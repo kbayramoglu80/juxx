@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş Yönetimi | Admin Paneli</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/fontawesome-all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background: #2c3e50; color: white; padding-top: 20px; }
+        .sidebar a { color: #bdc3c7; display: block; padding: 15px; text-decoration: none; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background: #34495e; color: white; border-left: 4px solid #d4af37; }
+        .main-content { padding: 30px; }
+        .gold-text { color: #d4af37; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
+            <h4 class="text-center gold-text mb-4">MI DIAMOND ADMIN</h4>
+            <a href="/admin"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+            <a href="/admin/products"><i class="fas fa-gem mr-2"></i> Ürünler</a>
+            <a href="/admin/categories"><i class="fas fa-list mr-2"></i> Kategoriler</a>
+            <a href="/admin/orders" class="active"><i class="fas fa-shopping-cart mr-2"></i> Siparişler</a>
+            <a href="/admin/users"><i class="fas fa-users mr-2"></i> Kullanıcılar</a>
+            <a href="/admin/banners"><i class="fas fa-image mr-2"></i> Bannerlar</a>
+            <a href="/"><i class="fas fa-external-link-alt mr-2"></i> Siteye Git</a>
+            <a href="/auth/logout" class="mt-5 text-danger"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış Yap</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <h2 class="mb-4">Sipariş Yönetimi</h2>
+            
+            <div class="card border-none shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sipariş No</th>
+                                <th>Müşteri</th>
+                                <th>Tutar</th>
+                                <th>Ödeme</th>
+                                <th>Durum</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td>#<%= order._id.toString().substring(0,8) %></td>
+                                    <td><%= order.user ? order.user.name : 'Misafir' %><br><small><%= order.user ? order.user.email : '' %></small></td>
+                                    <td>₺<%= order.totalAmount %></td>
+                                    <td><span class="badge badge-<%= order.paymentStatus === 'Paid' ? 'success' : 'warning' %>"><%= order.paymentStatus %></span></td>
+                                    <td>
+                                        <form action="/admin/orders/update/<%= order._id %>" method="POST" class="form-inline">
+                                            <select name="status" class="form-control form-control-sm mr-2" onchange="this.form.submit()">
+                                                <option value="Hazırlanıyor" <%= order.orderStatus === 'Hazırlanıyor' ? 'selected' : '' %>>Hazırlanıyor</option>
+                                                <option value="Kargoya Verildi" <%= order.orderStatus === 'Kargoya Verildi' ? 'selected' : '' %>>Kargoya Verildi</option>
+                                                <option value="Teslim Edildi" <%= order.orderStatus === 'Teslim Edildi' ? 'selected' : '' %>>Teslim Edildi</option>
+                                                <option value="İptal Edildi" <%= order.orderStatus === 'İptal Edildi' ? 'selected' : '' %>>İptal Edildi</option>
+                                            </select>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" title="Detay"><i class="fas fa-eye"></i></button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/vendor/jquery-1.12.4.min.js"></script>
+<script src="/assets/js/bootstrap.min.js"></script>
+</body>
+</html>

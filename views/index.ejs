@@ -1,0 +1,267 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main>
+    <!--? Hero Area Start-->
+    <div class="container-fluid">
+        <div class="slider-area">
+            <div class="slider-active dot-style">
+                <% if (typeof heroBanners !== 'undefined' && heroBanners.length > 0) { %>
+                    <% heroBanners.forEach(banner => { %>
+                        <div class="single-slider hero-overly slider-height d-flex align-items-center" style="background-image: url('<%= banner.imageUrl %>'); background-size: cover; background-position: center;">
+                            <div class="container">
+                                <div class="row justify-content-center">
+                                    <div class="col-xl-8 col-lg-9">
+                                        <!-- Hero Caption -->
+                                        <div class="hero__caption">
+                                            <h1><%- banner.title.replace(/\n/g, '<br>') %></h1>
+                                            <a href="<%= banner.link %>" class="btn"><%= banner.subtitle || 'Şimdi Al' %></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Fallback if no banners -->
+                    <div style="cursor: pointer; width: 100%; line-height: 0;" onclick="window.location.href='/shop'">
+                        <img src="/assets/img/hero/slider_1.png" alt="Açılışa Özel Kampanya" style="width: 100%; height: auto; display: block;">
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <!-- End Hero -->
+    
+<!--? New Arrival Start -->
+<div class="new-arrival">
+    <div class="container">
+        <!-- Section tittle -->
+        <div class="row justify-content-center">
+            <div class="col-xl-7 col-lg-8 col-md-10">
+                <div class="section-tittle mb-60 text-center wow fadeInUp" data-wow-duration="2s" data-wow-delay=".2s">
+                    <h2>Yeni<br>Gelenler</h2>
+                </div>
+            </div>
+        </div>
+        <div class="premium-grid">
+            <% if (typeof products !== 'undefined' && products.length > 0) { %>
+                <% products.forEach(product => { %>
+                    <div class="premium-card wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                        <div class="premium-card-img-wrapper">
+                            <a href="/product/<%= product._id %>">
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
+                                <!-- Mock secondary image for hover -->
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
+                            </a>
+                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <div class="card-actions">
+                                <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
+                                <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
+                            </div>
+                        </div>
+                        <div class="premium-card-info">
+                            <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
+                            <div class="premium-card-desc"><%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %></div>
+                            <div class="premium-card-price-wrap">
+                                <span class="premium-card-price">₺ <%= product.price %></span>
+                                <% if (product.price > 1000) { %>
+                                    <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 50px 0;">
+                    <p style="font-size: 16px; color: #888;">Henüz ürün eklenmemiş.</p>
+                </div>
+            <% } %>
+        </div>
+        <!-- Button -->
+        <div class="row justify-content-center">
+            <div class="room-btn">
+                <a href="/shop" class="border-btn">Daha Fazla Gör</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--? New Arrival End -->
+
+    <!--? Popular Items Start -->
+    <div class="popular-items pt-50">
+        <div class="container-fluid">
+            <style>
+                .col-fifth {
+                    position: relative;
+                    width: 100%;
+                    padding-right: 15px;
+                    padding-left: 15px;
+                }
+                @media (min-width: 992px) {
+                    .col-fifth {
+                        flex: 0 0 20%;
+                        max-width: 20%;
+                    }
+                }
+            </style>
+            <div class="row justify-content-center">
+                <% if (typeof popularProducts !== 'undefined' && popularProducts.length > 0) { %>
+                    <% popularProducts.forEach(product => { %>
+                        <div class="col-fifth col-md-4 col-sm-6">
+                            <div class="single-popular-items mb-50 text-center wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                                <div class="popular-img">
+                                    <img src="<%= product.imageUrl %>" alt="">
+                                    <div class="img-cap">
+                                        <span><%= product.category %></span>
+                                    </div>
+                                    <div class="favorit-items">
+                                     <a href="/product/<%= product._id %>" class="btn">İncele</a>
+                                 </div>
+                             </div>
+                             <div class="popular-caption mt-10">
+                                 <h4><a href="/product/<%= product._id %>" class="gold-text"><%= product.name %></a></h4>
+                             </div>
+                         </div>
+                     </div>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Default items if none are marked popular -->
+                    <div class="col-fifth col-md-4 col-sm-6">
+                        <div class="single-popular-items mb-50 text-center">
+                            <div class="popular-img">
+                                <img src="/assets/img/gallery/popular1.png" alt="">
+                                <div class="img-cap"><span>Pırlanta Yüzükler</span></div>
+                                <div class="favorit-items"><a href="/shop?category=yuzukler" class="btn">İncele</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-fifth col-md-4 col-sm-6">
+                        <div class="single-popular-items mb-50 text-center">
+                            <div class="popular-img">
+                                <img src="/assets/img/gallery/popular2.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
+                                <div class="img-cap"><span>Pırlanta Kolyeler</span></div>
+                                <div class="favorit-items"><a href="/shop?category=kolyeler" class="btn">İncele</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-fifth col-md-4 col-sm-6">
+                        <div class="single-popular-items mb-50 text-center">
+                            <div class="popular-img">
+                                <img src="/assets/img/gallery/popular3.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
+                                <div class="img-cap"><span>Pırlanta Küpeler</span></div>
+                                <div class="favorit-items"><a href="/shop?category=kupeler" class="btn">İncele</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-fifth col-md-4 col-sm-6">
+                        <div class="single-popular-items mb-50 text-center">
+                            <div class="popular-img">
+                                <img src="/assets/img/gallery/popular4.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
+                                <div class="img-cap"><span>Pırlanta Bileklikler</span></div>
+                                <div class="favorit-items"><a href="/shop?category=bileklikler" class="btn">İncele</a></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-fifth col-md-4 col-sm-6">
+                        <div class="single-popular-items mb-50 text-center">
+                            <div class="popular-img">
+                                <img src="/assets/img/gallery/popular5.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
+                                <div class="img-cap"><span>Alyanslar</span></div>
+                                <div class="favorit-items"><a href="/shop?category=alyanslar" class="btn">İncele</a></div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    <!-- Popular Items End -->
+
+<!--? collection -->
+<% if (typeof middleBanners !== 'undefined' && middleBanners.length > 0) { %>
+    <% middleBanners.forEach(banner => { %>
+        <section class="collection section-bg2 section-padding30 section-over1 ml-15 mr-15" style="background-image: url('<%= banner.imageUrl %>'); background-size: cover; background-position: center;">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-xl-7 col-lg-9">
+                        <div class="single-question text-center">
+                            <h2 class="wow fadeInUp" data-wow-duration="2s" data-wow-delay=".1s"><%= banner.title %></h2>
+                            <a href="<%= banner.link %>" class="btn wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s"><%= banner.subtitle || 'Keşfet' %></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <% }); %>
+<% } else { %>
+    <section class="collection section-bg2 section-padding30 section-over1 ml-15 mr-15" data-background="/assets/img/gallery/section_bg01.png">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-xl-7 col-lg-9">
+                    <div class="single-question text-center">
+                        <h2 class="wow fadeInUp" data-wow-duration="2s" data-wow-delay=".1s">Eşsiz Koleksiyonlarımızla Tanışın</h2>
+                        <a href="/about" class="btn wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s">Hakkımızda</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<% } %>
+<!-- End collection -->
+
+<!--? Services Area Start -->
+<div class="categories-area section-padding40 gray-bg">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-cat mb-50 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                    <div class="cat-icon">
+                        <img src="/assets/img/icon/services1.svg" alt="">
+                    </div>
+                    <div class="cat-cap">
+                        <h5>Hızlı ve Ücretsiz Teslimat</h5>
+                        <p>Tüm siparişlerde ücretsiz kargo</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-cat mb-50 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                    <div class="cat-icon">
+                        <img src="/assets/img/icon/services2.svg" alt="">
+                    </div>
+                    <div class="cat-cap">
+                        <h5>Güvenli Ödeme</h5>
+                        <p>PayTR ile %100 güvenli ödeme</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-cat mb-30 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".4s">
+                    <div class="cat-icon">
+                        <img src="/assets/img/icon/services3.svg" alt="">
+                    </div>
+                    <div class="cat-cap">
+                        <h5>Para İade Garantisi</h5>
+                        <p>14 gün içinde iade imkanı</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="single-cat wow fadeInUp" data-wow-duration="1s" data-wow-delay=".5s">
+                    <div class="cat-icon">
+                        <img src="/assets/img/icon/services4.svg" alt="">
+                    </div>
+                    <div class="cat-cap">
+                        <h5>7/24 Destek</h5>
+                        <p>Müşteri hizmetlerimiz her an yanınızda</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--? Services Area End -->
+</main>
+
+<%- include('partials/footer') %>

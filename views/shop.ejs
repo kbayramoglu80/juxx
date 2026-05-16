@@ -1,0 +1,210 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main>
+    <!-- Hero Area Start-->
+    <div class="slider-area ">
+        <div class="single-slider slider-height2 d-flex align-items-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="hero-cap text-center">
+                            <h2><%= pageTitle %></h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hero Area End-->
+    
+    <!-- Latest Products Start -->
+    <section class="latest-product-area padding-bottom">
+        <div class="container">
+            <div class="row product-btn d-flex justify-content-end align-items-end">
+                <!-- Section Tittle -->
+                <div class="col-xl-4 col-lg-5 col-md-5">
+                    <div class="section-tittle mb-30">
+                        <h2>Ürünler</h2>
+                    </div>
+                </div>
+                <div class="col-xl-8 col-lg-7 col-md-7">
+                    <div class="properties__button f-right">
+                        <!--Nav Button  -->
+                        <nav>                                                                                                
+                            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link <%= currentCategory === 'Hepsi' ? 'active' : '' %>" href="/shop">Hepsi</a>
+                                <% categories.forEach(cat => { %>
+                                    <a class="nav-item nav-link <%= currentCategory === cat.slug ? 'active' : '' %>" href="/kategori/<%= cat.slug %>"><%= cat.name %></a>
+                                <% }); %>
+                            </div>
+                        </nav>
+                        <!--End Nav Button  -->
+                    </div>
+                </div>
+            </div>
+            <!-- Nav Card -->
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                    <style>
+                        .sharp-product-img {
+                            border-radius: 0 !important;
+                            border: 1px solid #e0e0e0;
+                            box-shadow: none !important;
+                            width: 100%;
+                            height: 380px;
+                            object-fit: cover;
+                        }
+                        .category-section-title {
+                            width: 100%;
+                            border-bottom: 2px solid #1a1a1a;
+                            padding-bottom: 10px;
+                            margin-bottom: 30px;
+                            margin-top: 40px;
+                            font-weight: 700;
+                            font-family: 'Inter', sans-serif;
+                            color: #1a1a1a;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                        }
+                        .row:first-child .category-section-title {
+                            margin-top: 0;
+                        }
+                        .popular-caption h3 a {
+                            color: #1a1a1a;
+                            transition: color 0.3s;
+                        }
+                        .popular-caption h3 a:hover {
+                            color: #ff2020;
+                        }
+                    </style>
+
+                    <% if (products && products.length > 0) { %>
+                        <% if (currentCategory === 'Hepsi') { %>
+                            <% categories.forEach(cat => { %>
+                                <% const catProducts = products.filter(p => p.category && p.category._id.toString() === cat._id.toString()); %>
+                                <% if (catProducts.length > 0) { %>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <h3 class="category-section-title"><%= cat.name %></h3>
+                                        </div>
+                                    </div>
+                                    <div class="premium-grid">
+                                        <% catProducts.forEach(product => { %>
+                                            
+                    <div class="premium-card wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                        <div class="premium-card-img-wrapper">
+                            <a href="/product/<%= product._id %>">
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
+                                <!-- Mock secondary image for hover -->
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
+                            </a>
+                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <div class="card-actions">
+                                <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
+                                <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
+                            </div>
+                        </div>
+                        <div class="premium-card-info">
+                            <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
+                            <div class="premium-card-desc"><%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %></div>
+                            <div class="premium-card-price-wrap">
+                                <span class="premium-card-price">₺ <%= product.price %></span>
+                                <% if (product.price > 1000) { %>
+                                    <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                                        <% }); %>
+                                    </div>
+                                <% } %>
+                            <% }); %>
+                            
+                            <% /* Kategori atanmamış ürünler (Eğer varsa) */ %>
+                            <% const uncatProducts = products.filter(p => !p.category); %>
+                            <% if (uncatProducts.length > 0) { %>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h3 class="category-section-title">Diğer Ürünler</h3>
+                                    </div>
+                                </div>
+                                <div class="premium-grid">
+                                    <% uncatProducts.forEach(product => { %>
+                                        
+                    <div class="premium-card wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                        <div class="premium-card-img-wrapper">
+                            <a href="/product/<%= product._id %>">
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
+                                <!-- Mock secondary image for hover -->
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
+                            </a>
+                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <div class="card-actions">
+                                <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
+                                <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
+                            </div>
+                        </div>
+                        <div class="premium-card-info">
+                            <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
+                            <div class="premium-card-desc"><%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %></div>
+                            <div class="premium-card-price-wrap">
+                                <span class="premium-card-price">₺ <%= product.price %></span>
+                                <% if (product.price > 1000) { %>
+                                    <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                            
+                        <% } else { %>
+                            <div class="premium-grid">
+                                <% products.forEach(product => { %>
+                                    
+                    <div class="premium-card wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                        <div class="premium-card-img-wrapper">
+                            <a href="/product/<%= product._id %>">
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
+                                <!-- Mock secondary image for hover -->
+                                <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
+                            </a>
+                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <div class="card-actions">
+                                <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
+                                <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
+                            </div>
+                        </div>
+                        <div class="premium-card-info">
+                            <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
+                            <div class="premium-card-desc"><%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %></div>
+                            <div class="premium-card-price-wrap">
+                                <span class="premium-card-price">₺ <%= product.price %></span>
+                                <% if (product.price > 1000) { %>
+                                    <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="row">
+                            <div class="col-12 text-center py-5">
+                                <i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 20px;"></i>
+                                <h3 style="font-weight: 700; color: #555;">Bu kategoride ürün bulunamadı.</h3>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            <!-- End Nav Card -->
+        </div>
+    </section>
+    <!-- Latest Products End -->
+</main>
+
+<%- include('partials/footer') %>

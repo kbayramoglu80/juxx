@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Yönetimi | Admin Paneli</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/css/fontawesome-all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f9fa; }
+        .sidebar { min-height: 100vh; background: #2c3e50; color: white; padding-top: 20px; }
+        .sidebar a { color: #bdc3c7; display: block; padding: 15px; text-decoration: none; transition: 0.3s; }
+        .sidebar a:hover, .sidebar a.active { background: #34495e; color: white; border-left: 4px solid #d4af37; }
+        .main-content { padding: 30px; }
+        .gold-text { color: #d4af37; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
+            <h4 class="text-center gold-text mb-4">MI DIAMOND ADMIN</h4>
+            <a href="/admin"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+            <a href="/admin/products" class="active"><i class="fas fa-gem mr-2"></i> Ürünler</a>
+            <a href="/admin/categories"><i class="fas fa-list mr-2"></i> Kategoriler</a>
+            <a href="/admin/orders"><i class="fas fa-shopping-cart mr-2"></i> Siparişler</a>
+            <a href="/admin/users"><i class="fas fa-users mr-2"></i> Kullanıcılar</a>
+            <a href="/admin/banners"><i class="fas fa-image mr-2"></i> Bannerlar</a>
+            <a href="/"><i class="fas fa-external-link-alt mr-2"></i> Siteye Git</a>
+            <a href="/auth/logout" class="mt-5 text-danger"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış Yap</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Ürün Yönetimi</h2>
+                <button class="btn btn-warning" data-toggle="modal" data-target="#addProductModal">Yeni Ürün Ekle</button>
+            </div>
+            
+            <div class="card border-none shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Görsel</th>
+                                <th>Ürün Adı</th>
+                                <th>Kategori</th>
+                                <th>Fiyat</th>
+                                <th>Stok</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% products.forEach(product => { %>
+                                <tr>
+                                    <td><img src="<%= product.imageUrl %>" width="50" alt=""></td>
+                                    <td><%= product.name %></td>
+                                    <td><%= product.category ? product.category.name : 'Kategorisiz' %></td>
+                                    <td>₺<%= product.price %></td>
+                                    <td><%= product.stock %></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editProductModal" onclick='populateEditProduct(<%- JSON.stringify(product).replace(/'/g, "\\'") %>)'><i class="fas fa-edit"></i></button>
+                                        <a href="/admin/products/delete/<%= product._id %>" class="btn btn-sm btn-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')"><i class="fas fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Ürün Ekle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Ürün Adı</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <textarea name="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fiyat (₺)</label>
+                                <input type="number" name="price" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Stok</label>
+                                <input type="number" name="stock" class="form-control" value="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select name="category" class="form-control" required>
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat._id %>"><%= cat.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                                        <div class="form-group">
+                        <label>Ana Görsel (Katalog Resmi)</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input" id="customFile" name="imageFile" accept="image/*" required>
+                            <label class="custom-file-label" for="customFile" style="cursor: pointer;">Dosya Seçin veya Sürükleyin...</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Galeri Görselleri (Çoklu Seçim - Slider Sırası İçin)</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input" id="galleryFiles" name="galleryImages" accept="image/*" multiple>
+                            <label class="custom-file-label" for="galleryFiles" style="cursor: pointer;">Birden Fazla Dosya Seçebilirsiniz...</label>
+                        </div>
+                        <small class="text-muted">Seçtiğiniz dosyaların sırası, ürün detay sayfasındaki slider sırası olacaktır.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Ürün Tanıtım Videosu (İsteğe Bağlı)</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input" id="videoFile" name="videoFile" accept="video/mp4,video/webm">
+                            <label class="custom-file-label" for="videoFile" style="cursor: pointer;">MP4 veya WebM Video Seçin...</label>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="isPopular" class="form-check-input" id="isPopular">
+                        <label class="form-check-label" for="isPopular">Öne Çıkan Ürün (Ana Sayfada Göster)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-warning">Ürünü Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ürün Düzenle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editProductForm" action="" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Ürün Adı</label>
+                        <input type="text" id="editProductName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Açıklama</label>
+                        <textarea id="editProductDescription" name="description" class="form-control" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fiyat (₺)</label>
+                                <input type="number" id="editProductPrice" name="price" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Stok</label>
+                                <input type="number" id="editProductStock" name="stock" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select id="editProductCategory" name="category" class="form-control" required>
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat._id %>"><%= cat.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                                        <div class="form-group">
+                        <label>Yeni Ana Görsel (Değiştirmek isterseniz seçin)</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input" id="editCustomFile" name="imageFile" accept="image/*">
+                            <label class="custom-file-label" for="editCustomFile" style="cursor: pointer;">Dosya Seçin veya Sürükleyin...</label>
+                        </div>
+                        <small class="text-muted">Eğer görsel seçmezseniz eski görsel kullanılmaya devam eder.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Yeni Galeri Görselleri (Mevcut galeriyi tamamen değiştirir)</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input" id="editGalleryFiles" name="galleryImages" accept="image/*" multiple>
+                            <label class="custom-file-label" for="editGalleryFiles" style="cursor: pointer;">Birden Fazla Dosya Seçebilirsiniz...</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Yeni Tanıtım Videosu (Mevcut videoyu değiştirir)</label>
+                        <div class="custom-file mb-3">
+                            <input type="file" class="custom-file-input" id="editVideoFile" name="videoFile" accept="video/mp4,video/webm">
+                            <label class="custom-file-label" for="editVideoFile" style="cursor: pointer;">MP4 veya WebM Video Seçin...</label>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="isPopular" class="form-check-input" id="editProductIsPopular">
+                        <label class="form-check-label" for="editProductIsPopular">Öne Çıkan Ürün (Ana Sayfada Göster)</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-warning">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/vendor/jquery-1.12.4.min.js"></script>
+<script src="/assets/js/bootstrap.min.js"></script>
+<script>
+    function populateEditProduct(product) {
+        document.getElementById('editProductForm').action = '/admin/products/edit/' + product._id;
+        document.getElementById('editProductName').value = product.name;
+        document.getElementById('editProductDescription').value = product.description;
+        document.getElementById('editProductPrice').value = product.price;
+        document.getElementById('editProductStock').value = product.stock;
+        
+        if(product.category) {
+            document.getElementById('editProductCategory').value = product.category._id || product.category;
+        }
+
+        document.getElementById('editProductIsPopular').checked = product.isPopular;
+    }
+
+        // Bootstrap Custom File Input for Drag & Drop name
+    $('.custom-file-input').on('change', function(e) { 
+        let fileName = '';
+        if (e.target.files && e.target.files.length > 1) {
+            fileName = e.target.files.length + ' dosya seçildi';
+        } else {
+            fileName = $(this).val().split('\\').pop(); 
+        }
+        $(this).next('.custom-file-label').addClass("selected").html(fileName); 
+    });
+</script>
+</body>
+</html>

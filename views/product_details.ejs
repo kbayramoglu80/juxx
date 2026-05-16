@@ -1,0 +1,417 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+
+<main>
+    <!-- Hero Area Start-->
+    <div class="slider-area ">
+        <div class="single-slider slider-height2 d-flex align-items-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="hero-cap text-center">
+                            <h2>Ürün Detayı</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hero Area End-->
+
+    <style>
+        .product-detail-wrapper {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+            padding: 50px;
+            margin: -50px auto 50px;
+            position: relative;
+            z-index: 10;
+        }
+        .product-img-box {
+            text-align: center;
+        }
+        .product-img-box img {
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 500px;
+            object-fit: cover;
+        }
+        .product-img-box img:hover {
+            transform: scale(1.03);
+        }
+        .product-info-box {
+            padding-left: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+        @media (max-width: 991px) {
+            .product-info-box {
+                padding-left: 0;
+                margin-top: 40px;
+            }
+            .product-detail-wrapper {
+                padding: 30px;
+            }
+        }
+        .product-info-box h3 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            font-family: 'Inter', sans-serif;
+        }
+        .product-info-box .price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #ff2020;
+            margin-bottom: 25px;
+            display: inline-block;
+            background: rgba(255, 32, 32, 0.08);
+            padding: 5px 20px;
+            border-radius: 50px;
+        }
+        .product-info-box p {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 40px;
+            font-family: 'Inter', sans-serif;
+        }
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e1e1e1;
+            border-radius: 50px;
+            padding: 8px 20px;
+            background: #fff;
+        }
+        .qty-selector input {
+            width: 40px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1a1a1a;
+            outline: none;
+        }
+        .qty-selector button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.2s;
+            outline: none;
+        }
+        .qty-selector button:hover {
+            color: #ff2020;
+        }
+        .btn-buy-now {
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 50px;
+            padding: 16px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            border: none;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        .btn-buy-now:hover {
+            background: #ff2020;
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255,32,32,0.25);
+        }
+        .btn-add-cart {
+            background: #fff;
+            color: #1a1a1a;
+            border: 2px solid #1a1a1a;
+            border-radius: 50px;
+            padding: 14px 35px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        .btn-add-cart:hover {
+            background: #1a1a1a;
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+    </style>
+
+    
+    <!--? Product Details Start -->
+    <section class="product_details section_padding" style="background-color: #ffffff;">
+        <div class="pdp-wrapper">
+            <div class="row">
+                                <!-- LEFT COLUMN: GALLERY -->
+                <div class="col-lg-7">
+                    <div class="pdp-gallery-col">
+                        <!-- Main Image / Video Area -->
+                        <div class="pdp-main-image" id="main-image-container" onmousemove="zoomImage(event)" onmouseleave="resetZoom()">
+                            <img src="<%= product.imageUrl %>" id="main-product-image" alt="<%= product.name %>">
+                            <video id="main-product-video" controls style="display:none; width: 100%; max-height: 600px; object-fit: contain;"></video>
+                            
+                            <!-- Slider Nav Buttons -->
+                            <button class="slider-btn prev-btn" onclick="prevImage()"><i class="fas fa-chevron-left"></i></button>
+                            <button class="slider-btn next-btn" onclick="nextImage()"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        
+                        <!-- Thumbnails -->
+                        <div class="pdp-thumbnails" id="pdp-thumb-list">
+                            <!-- Main Image as first thumb -->
+                            <div class="pdp-thumb active media-thumb" onclick="changeMedia(this, '<%= product.imageUrl %>', 'image')">
+                                <img src="<%= product.imageUrl %>" alt="">
+                            </div>
+                            <!-- DB Images -->
+                            <% if (product.images && product.images.length > 0) { %>
+                                <% product.images.sort((a,b) => a.order - b.order).forEach((img) => { %>
+                                    <div class="pdp-thumb media-thumb" onclick="changeMedia(this, '<%= img.url %>', 'image')">
+                                        <img src="<%= img.url %>" alt="">
+                                    </div>
+                                <% }); %>
+                            <% } %>
+                            <!-- Video Thumb -->
+                            <% if (product.videoUrl) { %>
+                                <div class="pdp-thumb media-thumb video-thumb" onclick="changeMedia(this, '<%= product.videoUrl %>', 'video')">
+                                    <div class="video-overlay"><i class="fas fa-play"></i></div>
+                                    <img src="<%= product.imageUrl %>" alt="Video" style="filter: brightness(0.6);">
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: PRODUCT INFO -->
+                <div class="col-lg-5">
+                    <div class="pdp-info-col">
+                        <span class="pdp-sku">SKU: <%= product._id.toString().substring(0,8).toUpperCase() %></span>
+                        <h1 class="pdp-title"><%= product.name %></h1>
+                        
+                        <div class="pdp-price-area">
+                            <span class="pdp-current-price" id="pdp-price" data-base="<%= product.price %>">₺ <%= product.price %></span>
+                            <% if (product.price > 1000) { %>
+                                <span class="pdp-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                            <% } %>
+                            <span class="pdp-installment">PayTR ile 12 aya varan taksit imkanı</span>
+                        </div>
+
+                        <div class="pdp-description" style="font-size: 14px; color: var(--premium-gray); line-height: 1.6; margin-bottom: 30px;">
+                            <%= product.description %>
+                        </div>
+
+                        <!-- VARIATIONS (MOCK UI) -->
+                        <div class="variation-group">
+                            <div class="variation-label">Altın Rengi <span id="color-label">Beyaz Altın</span></div>
+                            <div class="swatch-list">
+                                <div class="swatch-color swatch-white-gold active" onclick="selectVariation(this, 'color', 'Beyaz Altın')" title="Beyaz Altın"></div>
+                                <div class="swatch-color swatch-yellow-gold" onclick="selectVariation(this, 'color', 'Sarı Altın')" title="Sarı Altın"></div>
+                                <div class="swatch-color swatch-rose-gold" onclick="selectVariation(this, 'color', 'Rose Altın')" title="Rose Altın"></div>
+                            </div>
+                        </div>
+
+                        <div class="variation-group">
+                            <div class="variation-label">Karat Büyüklüğü <span id="carat-label">0.30 Karat</span></div>
+                            <div class="pill-list">
+                                <div class="pill-item" onclick="selectVariation(this, 'carat', '0.10', 0.8)">0.10 ct</div>
+                                <div class="pill-item" onclick="selectVariation(this, 'carat', '0.20', 0.9)">0.20 ct</div>
+                                <div class="pill-item active" onclick="selectVariation(this, 'carat', '0.30', 1.0)">0.30 ct</div>
+                                <div class="pill-item" onclick="selectVariation(this, 'carat', '0.50', 1.5)">0.50 ct</div>
+                                <div class="pill-item" onclick="selectVariation(this, 'carat', '1.00', 2.8)">1.00 ct</div>
+                            </div>
+                        </div>
+
+                        <div class="variation-group">
+                            <div class="variation-label">Yüzük Ölçüsü <span>Ölçünüzü Seçin</span></div>
+                            <select class="premium-select">
+                                <option value="">Seçiniz</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                                <option value="13">13</option>
+                                <option value="14">14</option>
+                                <option value="15">15</option>
+                                <option value="16">16</option>
+                                <option value="17">17</option>
+                                <option value="18">18</option>
+                            </select>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="pdp-actions">
+                            <button class="btn-premium-secondary" onclick="handleCartAction('<%= product._id %>', false)">Sepete Ekle</button>
+                            <button class="btn-premium-primary" onclick="handleCartAction('<%= product._id %>', true)">Hemen Satın Al</button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Product Details End -->
+</main>
+
+<script>
+function updateQty(change) {
+    const input = document.getElementById('qty-input');
+    if (!input) return;
+    let val = parseInt(input.value) + change;
+    if (val < 1) val = 1;
+    if (val > 10) val = 10;
+    input.value = val;
+}
+
+async function handleCartAction(productId, isBuyNow) {
+    const qtyInput = document.getElementById('qty-input');
+    const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+    
+    // UI Feedback
+    const btnCart = document.querySelector('.btn-premium-secondary');
+    const btnBuy = document.querySelector('.btn-premium-primary');
+    
+    if (isBuyNow && btnBuy) {
+        btnBuy.innerHTML = '<i class="fas fa-spinner fa-spin"></i> İşleniyor...';
+    } else if (!isBuyNow && btnCart) {
+        btnCart.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ekleniyor...';
+    }
+
+    try {
+        const response = await fetch('/cart/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: quantity
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (isBuyNow) {
+                window.location.href = '/checkout';
+            } else {
+                alert('Ürün sepete başarıyla eklendi!');
+                window.location.reload(); 
+            }
+        } else {
+            alert('Hata: ' + data.message);
+            resetButtons(btnCart, btnBuy);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Bir hata oluştu, lütfen tekrar deneyin.');
+        resetButtons(btnCart, btnBuy);
+    }
+}
+
+function resetButtons(btnCart, btnBuy) {
+    if (btnCart) btnCart.innerHTML = 'Sepete Ekle';
+    if (btnBuy) btnBuy.innerHTML = 'Hemen Satın Al';
+}
+
+
+function selectVariation(element, type, value, priceMultiplier = null) {
+    element.parentElement.querySelectorAll(type === 'color' ? '.swatch-color' : '.pill-item').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById(type + '-label').innerText = value;
+    
+    if (priceMultiplier) {
+        const priceEl = document.getElementById('pdp-price');
+        const basePrice = parseFloat(priceEl.getAttribute('data-base'));
+        const newPrice = Math.round(basePrice * priceMultiplier);
+        priceEl.innerText = '₺ ' + newPrice;
+    }
+}
+
+function zoomImage(e) {
+    const container = document.getElementById('main-image-container');
+    const img = document.getElementById('main-product-image');
+    if (img.style.display === 'none') return; // Don't zoom video
+    
+    const x = e.clientX - container.getBoundingClientRect().left;
+    const y = e.clientY - container.getBoundingClientRect().top;
+    
+    // Zoom strength is 2x
+    img.style.transformOrigin = `${x}px ${y}px`;
+    img.style.transform = 'scale(2)';
+}
+
+function resetZoom() {
+    const img = document.getElementById('main-product-image');
+    img.style.transformOrigin = 'center center';
+    img.style.transform = 'scale(1)';
+}
+
+function changeMedia(element, src, type) {
+    const imgEl = document.getElementById('main-product-image');
+    const vidEl = document.getElementById('main-product-video');
+    
+    document.querySelectorAll('.pdp-thumb').forEach(t => t.classList.remove('active'));
+    element.classList.add('active');
+    
+    if (type === 'video') {
+        imgEl.style.display = 'none';
+        vidEl.style.display = 'block';
+        vidEl.src = src;
+        vidEl.play();
+        resetZoom(); // Reset zoom if video active
+    } else {
+        vidEl.pause();
+        vidEl.style.display = 'none';
+        imgEl.style.display = 'block';
+        imgEl.src = src;
+    }
+}
+
+function prevImage() {
+    const thumbs = Array.from(document.querySelectorAll('.media-thumb'));
+    const activeIdx = thumbs.findIndex(t => t.classList.contains('active'));
+    if (activeIdx > 0) {
+        thumbs[activeIdx - 1].click();
+    } else {
+        thumbs[thumbs.length - 1].click(); // loop to end
+    }
+}
+
+function nextImage() {
+    const thumbs = Array.from(document.querySelectorAll('.media-thumb'));
+    const activeIdx = thumbs.findIndex(t => t.classList.contains('active'));
+    if (activeIdx < thumbs.length - 1) {
+        thumbs[activeIdx + 1].click();
+    } else {
+        thumbs[0].click(); // loop to start
+    }
+}
+
+</script>
+
+<%- include('partials/footer') %>

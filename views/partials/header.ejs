@@ -1,0 +1,245 @@
+<style>
+    .custom-header {
+        font-family: 'Inter', 'Roboto', sans-serif;
+        background-color: transparent;
+    }
+    .custom-header .container-fluid {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+    .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 0;
+    }
+    .header-logo {
+        position: relative;
+        width: 220px;
+        height: 60px;
+    }
+    .header-logo img {
+        position: absolute;
+        top: -30px;
+        left: 0;
+        height: 270px;
+        width: auto;
+        max-width: 350px;
+        object-fit: contain;
+        z-index: 1050;
+    }
+    .header-search {
+        flex: 1;
+        max-width: 600px;
+        margin: 0 30px;
+        position: relative;
+    }
+    .header-search input {
+        width: 100%;
+        padding: 12px 45px 12px 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        font-size: 14px;
+        color: #555;
+        outline: none;
+    }
+    .header-search input::placeholder {
+        color: #999;
+    }
+    .header-search button {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #2a4066;
+        font-size: 18px;
+        cursor: pointer;
+    }
+    .header-icons {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+    }
+    .header-icons a {
+        color: #2a4066;
+        font-size: 24px;
+        position: relative;
+        text-decoration: none;
+    }
+    .header-icons a .badge {
+        position: absolute;
+        top: -6px;
+        right: -10px;
+        background-color: #d9534f;
+        color: white;
+        border-radius: 50%;
+        font-size: 11px;
+        padding: 4px 6px;
+        font-family: sans-serif;
+    }
+    .header-middle {
+        border-top: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 15px 0;
+    }
+    .header-nav {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 28px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .header-nav a {
+        color: #2a4066;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .header-nav a:hover {
+        color: #0056b3;
+    }
+    .header-bottom {
+        background-color: transparent;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .header-promo-nav {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 30px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .header-promo-nav a {
+        color: #b94a48;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .header-promo-nav a.text-dark {
+        color: #555;
+    }
+    .header-promo-nav a:hover {
+        text-decoration: underline;
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 991px) {
+        .header-search {
+            display: none;
+        }
+        .header-middle, .header-bottom {
+            display: none;
+        }
+        .header-logo {
+            width: 150px;
+            height: 50px;
+        }
+        .header-logo img {
+            height: 120px;
+            top: -10px;
+        }
+        .header-icons gap {
+            gap: 15px;
+        }
+        .header-icons a {
+            font-size: 20px;
+        }
+    }
+</style>
+
+<header class="custom-header">
+    <div class="container-fluid">
+        <!-- Top Row -->
+        <div class="header-top">
+            <div class="header-logo">
+                <a href="/">
+                    <img src="/assets/img/logo/custom_logo_v2.png" alt="Logo">
+                </a>
+            </div>
+            
+            <div class="header-search d-none d-lg-block">
+                <form action="/shop" method="GET">
+                    <input type="text" name="q" placeholder="Ürün kodu ya da ürün adı yazınız">
+                    <button type="submit"><i class="ti-search"></i></button>
+                </form>
+            </div>
+            
+            <div class="header-icons">
+                <a href="<%= user ? '/user/profile' : '/auth/login' %>" title="<%= user ? 'Hesabım' : 'Giriş Yap' %>">
+                    <i class="far fa-user"></i>
+                </a>
+                <a href="#" title="Favorilerim">
+                    <i class="far fa-heart"></i>
+                </a>
+                <a href="/cart" title="Sepetim">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span class="badge" id="cart-count"><%= locals.cartCount || 0 %></span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Placeholder for Slicknav -->
+        <div class="col-12">
+            <div class="mobile_menu d-block d-lg-none"></div>
+        </div>
+    </div>
+
+    <!-- Middle Row (Categories) -->
+    <div class="header-middle d-none d-lg-block">
+        <div class="container-fluid">
+            <ul class="header-nav">
+                <% if (locals.globalCategories && locals.globalCategories.length > 0) { %>
+                    <% globalCategories.forEach(category => { %>
+                        <li><a href="/shop?category=<%= category.slug %>"><%= category.name %></a></li>
+                    <% }); %>
+                <% } else { %>
+                    <!-- Fallback -->
+                    <li><a href="/shop">Mağaza</a></li>
+                <% } %>
+                
+                <% if (user && user.role === 'admin') { %>
+                    <li><a href="/admin" style="color: #d9534f; font-weight: bold;">Admin Paneli</a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bottom Row (Promotions) -->
+    <div class="header-bottom d-none d-lg-block">
+        <div class="container-fluid">
+            <ul class="header-promo-nav">
+                <li><a href="#">Pırlanta Fırsatları Net %50 İndirim</a></li>
+                <li><a href="#" class="text-dark">Çok Satanlar</a></li>
+                <li><a href="#" class="text-dark">Hızlı Kargo</a></li>
+                <li><a href="#" class="text-dark">Hediye Önerileri</a></li>
+                <li><a href="#" class="text-dark">Online Özel</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<!-- Hidden nav for Slicknav to build mobile menu -->
+<div class="d-none">
+    <ul id="navigation">
+        <li><a href="/">Ana Sayfa</a></li> 
+        <li><a href="/shop">Mağaza</a></li>
+        <% if (locals.globalCategories && locals.globalCategories.length > 0) { %>
+            <% globalCategories.forEach(category => { %>
+                <li><a href="/shop?category=<%= category.slug %>"><%= category.name %></a></li>
+            <% }); %>
+        <% } %>
+        <li><a href="/about">Hakkımızda</a></li>
+        <li><a href="/contact">İletişim</a></li>
+        <% if (user && user.role === 'admin') { %>
+            <li><a href="/admin">Admin Paneli</a></li>
+        <% } %>
+    </ul>
+</div>
