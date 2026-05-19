@@ -3,9 +3,13 @@
   
 
 /* 1. Proloder */
+    var preloaderStart = Date.now();
     $(window).on('load', function () {
-      $('#preloader-active').delay(450).fadeOut('slow');
-      $('body').delay(450).css({
+      var timeElapsed = Date.now() - preloaderStart;
+      var delayTime = Math.max(0, 1000 - timeElapsed);
+      
+      $('#preloader-active').delay(delayTime).fadeOut('slow');
+      $('body').delay(delayTime).css({
         'overflow': 'visible'
       });
     });

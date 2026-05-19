@@ -9,6 +9,13 @@ router.get('/product/:id', indexController.getProductDetails);
 router.get('/about', indexController.getAbout);
 router.get('/contact', indexController.getContact);
 
+// Auth Shortcuts
+const authController = require('../controllers/authController');
+router.get('/login', authController.getLogin);
+router.post('/login', authController.postLogin);
+router.get('/register', authController.getRegister);
+router.post('/register', authController.postRegister);
+
 // Cart Routes
 router.get('/cart', indexController.getCart);
 router.post('/cart/add', indexController.addToCart);

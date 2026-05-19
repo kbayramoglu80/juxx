@@ -27,7 +27,7 @@
                             <% if (error) { %>
                                 <div class="alert alert-danger"><%= error %></div>
                             <% } %>
-                            <form class="row contact_form" action="/auth/register" method="post" novalidate="novalidate">
+                            <form class="row contact_form" action="/register" method="post" novalidate="novalidate">
                                 <div class="col-md-12 form-group p_star">
                                     <input type="text" class="form-control" id="name" name="name" value=""
                                         placeholder="Ad Soyad">
@@ -46,7 +46,7 @@
                                     </button>
                                 </div>
                                 <div class="col-md-12 text-center mt-3">
-                                    <a href="/auth/login">Zaten hesabınız var mı? Giriş yapın.</a>
+                                    <a href="/login">Zaten hesabınız var mı? Giriş yapın.</a>
                                 </div>
                             </form>
                         </div>

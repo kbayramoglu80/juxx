@@ -12,16 +12,22 @@ exports.postLogin = async (req, res) => {
         
         if (user && await bcrypt.compare(password, user.password)) {
             req.session.user = {
-                id: user._id,
-                name: user.name,
+                _id: user._id,
+                name: user.fullName || user.name,
                 email: user.email,
                 role: user.role
             };
             
-            if (user.role === 'admin') {
-                return res.redirect('/admin');
-            }
-            return res.redirect('/');
+            return req.session.save(err => {
+                if (err) {
+                    console.error('Session save error:', err);
+                    return res.render('login', { error: 'Giriş yapılırken bir hata oluştu.' });
+                }
+                if (user.role === 'admin') {
+                    return res.redirect('/admin');
+                }
+                return res.redirect('/');
+            });
         }
         
         res.render('login', { error: 'Hatalı e-posta veya şifre.' });
@@ -60,6 +66,10 @@ exports.postRegister = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-    req.session.destroy();
-    res.redirect('/');
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Session destroy error:', err);
+        }
+        res.redirect('/');
+    });
 };

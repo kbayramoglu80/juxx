@@ -3,6 +3,95 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const Banner = require('../models/Banner');
 const Category = require('../models/Category');
+const Message = require('../models/Message');
+
+// Support / Chat Methods
+exports.getSupport = async (req, res) => {
+    try {
+        // Hem gönderen hem de alan tarafında kullanıcıyı ara (Admin olmayan taraf)
+        const sentUsers = await Message.distinct('sender', { isAdminSender: false });
+        const receivedUsers = await Message.distinct('receiver', { isAdminSender: true });
+        
+        // Benzersiz kullanıcı ID'lerini birleştir
+        const allUserIds = [...new Set([...sentUsers, ...receivedUsers])].filter(id => id != null);
+        
+        const users = await User.find({ _id: { $in: allUserIds } });
+        
+        res.render('admin/support', { users });
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+};
+
+exports.getUserMessages = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const messages = await Message.find({
+            $or: [
+                { sender: userId },
+                { receiver: userId }
+            ]
+        }).sort({ createdAt: 1 });
+        
+        const user = await User.findById(userId);
+        res.json({ success: true, messages, user });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.sendAdminMessage = async (req, res) => {
+    try {
+        const { userId, content } = req.body;
+        const newMessage = new Message({
+            receiver: userId,
+            isAdminSender: true,
+            content
+        });
+        
+        await newMessage.save();
+        res.json({ success: true, message: newMessage });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.deleteChatMessage = async (req, res) => {
+    try {
+        await Message.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.editChatMessage = async (req, res) => {
+    try {
+        const { content } = req.body;
+        await Message.findByIdAndUpdate(req.params.id, { content });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+exports.endChat = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        // Tüm mesajları sil (Kullanıcı bir daha göremesin diye)
+        await Message.deleteMany({
+            $or: [
+                { sender: userId },
+                { receiver: userId }
+            ]
+        });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
+
 
 const bufferToBase64 = (file) => {
     return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
@@ -35,7 +124,10 @@ exports.postLogin = (req, res) => {
     const { password } = req.body;
     if (password === process.env.ADMIN_PASSWORD) {
         req.session.isAdmin = true;
-        return res.redirect('/admin');
+        return req.session.save(err => {
+            if (err) console.error(err);
+            res.redirect('/admin');
+        });
     }
     res.render('admin/login', { error: 'Hatalı şifre!' });
 };
@@ -47,9 +139,37 @@ exports.getProducts = async (req, res) => {
     res.render('admin/products', { products, categories });
 };
 
+// Helper to clean and parse Turkish formatted prices elegantly
+const parseTurkishPrice = (priceVal) => {
+    if (priceVal === undefined || priceVal === null || priceVal === '') return 0;
+    if (typeof priceVal === 'number') return priceVal;
+    
+    let cleaned = priceVal.toString().trim();
+    
+    // If there is both a dot and a comma, remove the dot and replace the comma with a dot
+    if (cleaned.includes('.') && cleaned.includes(',')) {
+        cleaned = cleaned.replace(/\./g, '').replace(/,/g, '.');
+    } 
+    // If there is only a dot and it's followed by exactly 3 digits, it's a thousands separator (e.g., "30.000")
+    else if (cleaned.includes('.') && !cleaned.includes(',')) {
+        const parts = cleaned.split('.');
+        const lastPart = parts[parts.length - 1];
+        if (lastPart.length === 3) {
+            cleaned = cleaned.replace(/\./g, '');
+        }
+    }
+    // If there is only a comma, replace it with a dot
+    else if (cleaned.includes(',') && !cleaned.includes('.')) {
+        cleaned = cleaned.replace(/,/g, '.');
+    }
+    
+    const parsed = parseFloat(cleaned);
+    return isNaN(parsed) ? 0 : parsed;
+};
+
 exports.addProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock, isPopular } = req.body;
+        const { name, description, price, category, stock, isPopular, existingImages, existingImagesOrder, videoOrder } = req.body;
         
         let imageUrl = '/assets/img/gallery/popular1.png'; // default
         let images = [];
@@ -59,28 +179,48 @@ exports.addProduct = async (req, res) => {
             if (req.files.imageFile && req.files.imageFile.length > 0) {
                 imageUrl = bufferToBase64(req.files.imageFile[0]);
             }
-            if (req.files.galleryImages) {
-                req.files.galleryImages.forEach((file, index) => {
-                    images.push({ url: bufferToBase64(file), order: index });
-                });
-            }
             if (req.files.videoFile && req.files.videoFile.length > 0) {
                 videoUrl = bufferToBase64(req.files.videoFile[0]);
             }
         }
+
+        // Process client-side base64 gallery images & their orders (similar to editProduct)
+        if (existingImages) {
+            const keptImages = Array.isArray(existingImages) ? existingImages : [existingImages];
+            const keptImagesOrder = existingImagesOrder 
+                ? (Array.isArray(existingImagesOrder) ? existingImagesOrder : [existingImagesOrder])
+                : [];
+            
+            keptImages.forEach((url, index) => {
+                const orderVal = (keptImagesOrder && keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
+                    ? parseInt(keptImagesOrder[index]) 
+                    : index;
+                images.push({ url, order: orderVal });
+            });
+        }
+
+        let parsedVideoOrder = 99;
+        if (videoUrl) {
+            parsedVideoOrder = (videoOrder !== undefined && videoOrder !== '') ? parseInt(videoOrder) : 99;
+        }
+
+        const parsedPrice = parseTurkishPrice(price);
+
         console.log('--- ADD PRODUCT ATTEMPT ---');
         console.log('Body:', req.body);
+        console.log('Parsed Price:', parsedPrice);
         console.log('Files:', req.files ? Object.keys(req.files) : 'No files');
 
         const newProduct = new Product({ 
             name, 
             description, 
-            price, 
+            price: parsedPrice, 
             category, 
             stock, 
             imageUrl, 
             images,
             videoUrl,
+            videoOrder: parsedVideoOrder,
             isPopular: isPopular === 'on' 
         });
         await newProduct.save();
@@ -94,31 +234,57 @@ exports.addProduct = async (req, res) => {
 
 exports.editProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock, isPopular } = req.body;
+        const { name, description, price, category, stock, isPopular, existingImages, videoOrder, deleteVideo } = req.body;
         
+        const parsedPrice = parseTurkishPrice(price);
+
         let updateData = {
             name, 
             description, 
-            price, 
+            price: parsedPrice, 
             category, 
             stock, 
             isPopular: isPopular === 'on' 
         };
 
+        // Extract kept existing images in their new sorted order
+        let images = [];
+        if (existingImages) {
+            const keptImages = Array.isArray(existingImages) ? existingImages : [existingImages];
+            const keptImagesOrder = req.body.existingImagesOrder 
+                ? (Array.isArray(req.body.existingImagesOrder) ? req.body.existingImagesOrder : [req.body.existingImagesOrder])
+                : [];
+            
+            keptImages.forEach((url, index) => {
+                const orderVal = (keptImagesOrder && keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
+                    ? parseInt(keptImagesOrder[index]) 
+                    : index;
+                images.push({ url, order: orderVal });
+            });
+        }
+
+        // Process files
         if (req.files) {
             if (req.files.imageFile && req.files.imageFile.length > 0) {
                 updateData.imageUrl = bufferToBase64(req.files.imageFile[0]);
             }
             
-            if (req.files.galleryImages && req.files.galleryImages.length > 0) {
-                updateData.images = [];
-                req.files.galleryImages.forEach((file, index) => {
-                    updateData.images.push({ url: bufferToBase64(file), order: index });
-                });
-            }
-            
+            // Process new video upload
             if (req.files.videoFile && req.files.videoFile.length > 0) {
                 updateData.videoUrl = bufferToBase64(req.files.videoFile[0]);
+            }
+        }
+
+        // Save sorted images array
+        updateData.images = images;
+
+        // Process video delete or order update
+        if (deleteVideo === 'true') {
+            updateData.videoUrl = '';
+            updateData.videoOrder = 99;
+        } else {
+            if (videoOrder !== undefined && videoOrder !== '') {
+                updateData.videoOrder = parseInt(videoOrder);
             }
         }
 

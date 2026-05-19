@@ -38,6 +38,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    videoOrder: {
+        type: Number,
+        default: 99
+    },
     isPopular: {
         type: Boolean,
         default: false

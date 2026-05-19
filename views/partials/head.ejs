@@ -29,13 +29,24 @@
 <body class="full-wrapper">
     <!-- ? Preloader Start -->
     <div id="preloader-active">
-        <div class="preloader d-flex align-items-center justify-content-center">
-            <div class="preloader-inner position-relative">
-                <div class="preloader-circle"></div>
-                <div class="preloader-img pere-text">
-                    <img src="/assets/img/logo/logo.png" alt="">
+        <div class="preloader d-flex align-items-center justify-content-center" style="background-color: #ffffff; z-index: 999999;">
+            <div class="preloader-inner position-relative text-center">
+                <div class="preloader-img">
+                    <img src="/assets/img/logo/custom_logo_v2.png" alt="MI DIAMOND" style="max-width: 250px; height: auto; animation: logoPulse 1.2s ease-in-out infinite alternate;">
                 </div>
             </div>
         </div>
     </div>
+    <style>
+        @keyframes logoPulse {
+            0% {
+                opacity: 0.6;
+                transform: scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.04);
+            }
+        }
+    </style>
     <!-- Preloader Start-->

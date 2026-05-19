@@ -27,6 +27,7 @@
             <a href="/admin/categories"><i class="fas fa-list mr-2"></i> Kategoriler</a>
             <a href="/admin/orders"><i class="fas fa-shopping-cart mr-2"></i> Siparişler</a>
             <a href="/admin/users"><i class="fas fa-users mr-2"></i> Kullanıcılar</a>
+            <a href="/admin/support"><i class="fas fa-comments mr-2"></i> Canlı Destek</a>
             <a href="/admin/banners"><i class="fas fa-image mr-2"></i> Bannerlar</a>
             <a href="/"><i class="fas fa-external-link-alt mr-2"></i> Siteye Git</a>
             <a href="/auth/logout" class="mt-5 text-danger"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış Yap</a>
@@ -126,7 +127,7 @@
                     <div class="form-group">
                         <label>Galeri Görselleri (Çoklu Seçim - Slider Sırası İçin)</label>
                         <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="galleryFiles" name="galleryImages" accept="image/*" multiple>
+                            <input type="file" class="custom-file-input" id="galleryFiles" accept="image/*" multiple>
                             <label class="custom-file-label" for="galleryFiles" style="cursor: pointer;">Birden Fazla Dosya Seçebilirsiniz...</label>
                         </div>
                         <small class="text-muted">Seçtiğiniz dosyaların sırası, ürün detay sayfasındaki slider sırası olacaktır.</small>
@@ -137,6 +138,15 @@
                             <input type="file" class="custom-file-input" id="videoFile" name="videoFile" accept="video/mp4,video/webm">
                             <label class="custom-file-label" for="videoFile" style="cursor: pointer;">MP4 veya WebM Video Seçin...</label>
                         </div>
+                    </div>
+                    <!-- Draggable Create Media Grid -->
+                    <div class="form-group">
+                        <label class="font-weight-bold gold-text">Galeri Görselleri ve Tanıtım Videosu Sıralaması</label>
+                        <small class="text-muted d-block mb-2">Seçtiğiniz görsel ve videoları sürükleyip bırakarak dilediğiniz gibi sıralayabilirsiniz.</small>
+                        <div id="createMediaContainer" class="d-flex flex-wrap gap-2 mt-3" style="min-height: 80px; border: 1px dashed #ced4da; border-radius: 8px; padding: 10px; background-color: #fcfcfc;">
+                            <span class="text-muted w-100 text-center" id="createMediaEmptyText">Henüz galeri görseli veya videosu eklenmedi.</span>
+                        </div>
+                        <div id="createMediaHiddenInputs"></div>
                     </div>
                     <div class="form-check mb-3">
                         <input type="checkbox" name="isPopular" class="form-check-input" id="isPopular">
@@ -202,8 +212,19 @@
                         </div>
                         <small class="text-muted">Eğer görsel seçmezseniz eski görsel kullanılmaya devam eder.</small>
                     </div>
+                    <!-- Draggable Current Media Grid -->
                     <div class="form-group">
-                        <label>Yeni Galeri Görselleri (Mevcut galeriyi tamamen değiştirir)</label>
+                        <label class="font-weight-bold">Mevcut Galeri Görselleri ve Video Sıralaması</label>
+                        <div id="editMediaContainer" class="d-flex flex-wrap align-items-center p-3 border rounded bg-white" style="min-height: 110px; gap: 12px;"></div>
+                        <small class="text-muted d-block mt-1">Görselleri ve videoyu sürükleyip bırakarak sıralayabilirsiniz. Çöp kutusu <i class="fas fa-trash-alt text-danger"></i> butonuna tıklayarak istemediklerinizi silebilirsiniz. (Videolar mavi çerçeveyle gösterilir)</small>
+                        
+                        <!-- Hidden inputs to serialize final state -->
+                        <div id="editMediaHiddenInputs"></div>
+                        <input type="hidden" name="deleteVideo" id="deleteVideoInput" value="false">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Yeni Galeri Görselleri Ekle (Mevcut olanların sonuna eklenir)</label>
                         <div class="custom-file mb-3">
                             <input type="file" class="custom-file-input" id="editGalleryFiles" name="galleryImages" accept="image/*" multiple>
                             <label class="custom-file-label" for="editGalleryFiles" style="cursor: pointer;">Birden Fazla Dosya Seçebilirsiniz...</label>
@@ -233,6 +254,148 @@
 <script src="/assets/js/vendor/jquery-1.12.4.min.js"></script>
 <script src="/assets/js/bootstrap.min.js"></script>
 <script>
+    let dragSourceElement = null;
+
+    function handleDragStart(e) {
+        this.style.opacity = '0.4';
+        dragSourceElement = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragOver(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) {
+            e.stopPropagation();
+        }
+        
+        if (dragSourceElement !== this) {
+            // Swap content and dataset
+            const tempHTML = this.innerHTML;
+            const tempType = this.dataset.type;
+            const tempUrl = this.dataset.url;
+            
+            this.innerHTML = dragSourceElement.innerHTML;
+            this.dataset.type = dragSourceElement.dataset.type;
+            this.dataset.url = dragSourceElement.dataset.url;
+            
+            dragSourceElement.innerHTML = tempHTML;
+            dragSourceElement.dataset.type = tempType;
+            dragSourceElement.dataset.url = tempUrl;
+            
+            const container = this.parentElement || dragSourceElement.parentElement;
+            if (container && container.id === 'createMediaContainer') {
+                serializeCreateMediaState();
+            } else {
+                serializeMediaState();
+            }
+        }
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        this.style.opacity = '1';
+        const container = this.parentElement;
+        if (container && container.id === 'createMediaContainer') {
+            serializeCreateMediaState();
+        } else {
+            serializeMediaState();
+        }
+    }
+
+    function removeMediaItem(button) {
+        const item = button.closest('.draggable-media-item');
+        if (!item) return;
+        const container = item.parentElement;
+        const isEdit = (container && container.id === 'editMediaContainer');
+        
+        if (item.dataset.type === 'video' && isEdit) {
+            document.getElementById('deleteVideoInput').value = 'true';
+        }
+        item.remove();
+        
+        if (container.querySelectorAll('.draggable-media-item').length === 0) {
+            if (isEdit) {
+                container.innerHTML = '<span class="text-muted w-100 text-center">Bu ürünün henüz galeri görseli veya videosu yok.</span>';
+            } else {
+                container.innerHTML = '<span class="text-muted w-100 text-center" id="createMediaEmptyText">Henüz galeri görseli veya videosu eklenmedi.</span>';
+            }
+        }
+        
+        if (isEdit) {
+            serializeMediaState();
+        } else {
+            serializeCreateMediaState();
+        }
+    }
+
+    function serializeMediaState() {
+        const container = document.getElementById('editMediaContainer');
+        const hiddenContainer = document.getElementById('editMediaHiddenInputs');
+        if (!container || !hiddenContainer) return;
+        hiddenContainer.innerHTML = '';
+        
+        const items = container.querySelectorAll('.draggable-media-item');
+        items.forEach((item, index) => {
+            if (item.dataset.type === 'image') {
+                const inputUrl = document.createElement('input');
+                inputUrl.type = 'hidden';
+                inputUrl.name = 'existingImages';
+                inputUrl.value = item.dataset.url;
+                hiddenContainer.appendChild(inputUrl);
+
+                const inputOrder = document.createElement('input');
+                inputOrder.type = 'hidden';
+                inputOrder.name = 'existingImagesOrder';
+                inputOrder.value = index;
+                hiddenContainer.appendChild(inputOrder);
+            } else if (item.dataset.type === 'video') {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'videoOrder';
+                input.value = index;
+                hiddenContainer.appendChild(input);
+            }
+        });
+    }
+
+    function serializeCreateMediaState() {
+        const container = document.getElementById('createMediaContainer');
+        const hiddenContainer = document.getElementById('createMediaHiddenInputs');
+        if (!container || !hiddenContainer) return;
+        hiddenContainer.innerHTML = '';
+        
+        const items = container.querySelectorAll('.draggable-media-item');
+        items.forEach((item, index) => {
+            if (item.dataset.type === 'image') {
+                const inputUrl = document.createElement('input');
+                inputUrl.type = 'hidden';
+                inputUrl.name = 'existingImages';
+                inputUrl.value = item.dataset.url;
+                hiddenContainer.appendChild(inputUrl);
+
+                const inputOrder = document.createElement('input');
+                inputOrder.type = 'hidden';
+                inputOrder.name = 'existingImagesOrder';
+                inputOrder.value = index;
+                hiddenContainer.appendChild(inputOrder);
+            } else if (item.dataset.type === 'video') {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'videoOrder';
+                input.value = index;
+                hiddenContainer.appendChild(input);
+            }
+        });
+    }
+
     function populateEditProduct(product) {
         document.getElementById('editProductForm').action = '/admin/products/edit/' + product._id;
         document.getElementById('editProductName').value = product.name;
@@ -245,10 +408,282 @@
         }
 
         document.getElementById('editProductIsPopular').checked = product.isPopular;
+        document.getElementById('deleteVideoInput').value = 'false';
+        
+        let mediaList = [];
+        if (product.images && product.images.length > 0) {
+            product.images.forEach(img => {
+                mediaList.push({ type: 'image', url: img.url, order: img.order || 0 });
+            });
+        }
+        if (product.videoUrl) {
+            let vOrder = (product.videoOrder !== undefined && product.videoOrder !== null) ? product.videoOrder : 99;
+            mediaList.push({ type: 'video', url: product.videoUrl, order: vOrder });
+        }
+        
+        mediaList.sort((a, b) => a.order - b.order);
+        
+        const container = document.getElementById('editMediaContainer');
+        container.innerHTML = '';
+        
+        if (mediaList.length === 0) {
+            container.innerHTML = '<span class="text-muted w-100 text-center">Bu ürünün henüz galeri görseli veya videosu yok.</span>';
+        } else {
+            mediaList.forEach(media => {
+                const itemEl = document.createElement('div');
+                itemEl.className = `position-relative draggable-media-item ${media.type === 'video' ? 'border border-primary rounded shadow-sm' : 'border border-light rounded shadow-sm'}`;
+                itemEl.style.width = '80px';
+                itemEl.style.height = '80px';
+                itemEl.style.cursor = 'move';
+                itemEl.draggable = true;
+                itemEl.dataset.type = media.type;
+                itemEl.dataset.url = media.url;
+                
+                let innerHTML = '';
+                if (media.type === 'image') {
+                    innerHTML = `
+                        <img src="${media.url}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    `;
+                } else {
+                    innerHTML = `
+                        <div class="bg-dark text-white d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: 100%; border-radius: 8px;">
+                            <i class="fas fa-video fa-lg gold-text mb-1"></i>
+                            <span style="font-size: 9px; font-weight: bold; letter-spacing: 0.5px;">VİDEO</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    `;
+                }
+                itemEl.innerHTML = innerHTML;
+                
+                itemEl.addEventListener('dragstart', handleDragStart);
+                itemEl.addEventListener('dragover', handleDragOver);
+                itemEl.addEventListener('drop', handleDrop);
+                itemEl.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(itemEl);
+            });
+        }
+        
+        serializeMediaState();
     }
 
-        // Bootstrap Custom File Input for Drag & Drop name
-    $('.custom-file-input').on('change', function(e) { 
+    // Helper function to compress large gallery images using HTML5 Canvas
+    function compressAndAddImage(file, container, isEdit) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Maximum dimension limit for high quality web optimization
+                const MAX_WIDTH = 1000;
+                const MAX_HEIGHT = 1000;
+                
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Compress to JPEG with 0.75 quality - yields tiny file sizes (100KB-200KB instead of 10MB!) with stunning clarity
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                
+                const itemEl = document.createElement('div');
+                itemEl.className = 'position-relative draggable-media-item border border-light rounded shadow-sm';
+                itemEl.style.width = '80px';
+                itemEl.style.height = '80px';
+                itemEl.style.cursor = 'move';
+                itemEl.draggable = true;
+                itemEl.dataset.type = 'image';
+                itemEl.dataset.url = compressedBase64;
+                
+                itemEl.innerHTML = `
+                    <img src="${compressedBase64}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                
+                itemEl.addEventListener('dragstart', handleDragStart);
+                itemEl.addEventListener('dragover', handleDragOver);
+                itemEl.addEventListener('drop', handleDrop);
+                itemEl.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(itemEl);
+                
+                if (isEdit) {
+                    serializeMediaState();
+                } else {
+                    serializeCreateMediaState();
+                }
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Listen for new gallery image selections in CREATE Modal
+    $('#galleryFiles').on('change', function(e) {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        
+        const container = document.getElementById('createMediaContainer');
+        const emptyText = document.getElementById('createMediaEmptyText');
+        if (emptyText) emptyText.remove();
+        
+        const generalEmpty = container.querySelector('.text-muted');
+        if (generalEmpty && generalEmpty.innerText.includes('Henüz galeri')) {
+            generalEmpty.remove();
+        }
+        
+        Array.from(files).forEach(file => {
+            compressAndAddImage(file, container, false);
+        });
+        
+        const labelText = files.length + ' görsel eklendi. Sıralayabilirsiniz.';
+        $(this).next('.custom-file-label').addClass("selected").html(labelText);
+    });
+
+    // Listen for new video selection in CREATE Modal
+    $('#videoFile').on('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const container = document.getElementById('createMediaContainer');
+        const emptyText = document.getElementById('createMediaEmptyText');
+        if (emptyText) emptyText.remove();
+        
+        const generalEmpty = container.querySelector('.text-muted');
+        if (generalEmpty && generalEmpty.innerText.includes('Henüz galeri')) {
+            generalEmpty.remove();
+        }
+        
+        const existingVideos = container.querySelectorAll('.draggable-media-item');
+        existingVideos.forEach(item => {
+            if (item.dataset.type === 'video') {
+                item.remove();
+            }
+        });
+        
+        const itemEl = document.createElement('div');
+        itemEl.className = 'position-relative draggable-media-item border border-primary rounded shadow-sm';
+        itemEl.style.width = '80px';
+        itemEl.style.height = '80px';
+        itemEl.style.cursor = 'move';
+        itemEl.draggable = true;
+        itemEl.dataset.type = 'video';
+        itemEl.dataset.url = 'NEW_VIDEO_UPLOAD';
+        
+        itemEl.innerHTML = `
+            <div class="bg-dark text-white d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: 100%; border-radius: 8px;">
+                <i class="fas fa-video fa-lg text-primary mb-1"></i>
+                <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; color: #007bff;">YENİ VİDEO</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        `;
+        
+        itemEl.addEventListener('dragstart', handleDragStart);
+        itemEl.addEventListener('dragover', handleDragOver);
+        itemEl.addEventListener('drop', handleDrop);
+        itemEl.addEventListener('dragend', handleDragEnd);
+        
+        container.appendChild(itemEl);
+        serializeCreateMediaState();
+        
+        $(this).next('.custom-file-label').addClass("selected").html('Yeni video eklendi. Sıralayabilirsiniz.');
+    });
+
+    // Listen for new gallery image selections in EDIT Modal
+    $('#editGalleryFiles').on('change', function(e) {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+        
+        const container = document.getElementById('editMediaContainer');
+        const emptyText = container.querySelector('.text-muted');
+        if (emptyText && emptyText.innerText.includes('Bu ürünün henüz')) {
+            container.innerHTML = '';
+        }
+        
+        Array.from(files).forEach(file => {
+            compressAndAddImage(file, container, true);
+        });
+        
+        const labelText = files.length + ' yeni görsel eklendi. Sıralayabilirsiniz.';
+        $(this).next('.custom-file-label').addClass("selected").html(labelText);
+    });
+
+    // Listen for new video selection in EDIT Modal
+    $('#editVideoFile').on('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const container = document.getElementById('editMediaContainer');
+        const emptyText = container.querySelector('.text-muted');
+        if (emptyText && emptyText.innerText.includes('Bu ürünün henüz')) {
+            container.innerHTML = '';
+        }
+        
+        const existingVideos = container.querySelectorAll('.draggable-media-item');
+        existingVideos.forEach(item => {
+            if (item.dataset.type === 'video') {
+                item.remove();
+            }
+        });
+        
+        const itemEl = document.createElement('div');
+        itemEl.className = 'position-relative draggable-media-item border border-primary rounded shadow-sm';
+        itemEl.style.width = '80px';
+        itemEl.style.height = '80px';
+        itemEl.style.cursor = 'move';
+        itemEl.draggable = true;
+        itemEl.dataset.type = 'video';
+        itemEl.dataset.url = 'NEW_VIDEO_UPLOAD';
+        
+        itemEl.innerHTML = `
+            <div class="bg-dark text-white d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: 100%; border-radius: 8px;">
+                <i class="fas fa-video fa-lg text-primary mb-1"></i>
+                <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; color: #007bff;">YENİ VİDEO</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        `;
+        
+        itemEl.addEventListener('dragstart', handleDragStart);
+        itemEl.addEventListener('dragover', handleDragOver);
+        itemEl.addEventListener('drop', handleDrop);
+        itemEl.addEventListener('dragend', handleDragEnd);
+        
+        container.appendChild(itemEl);
+        document.getElementById('deleteVideoInput').value = 'false';
+        serializeMediaState();
+        
+        $(this).next('.custom-file-label').addClass("selected").html('Yeni video eklendi. Sıralayabilirsiniz.');
+    });
+
+    // Bootstrap Custom File Input for generic name
+    $('.custom-file-input').not('#editGalleryFiles, #editVideoFile, #galleryFiles, #videoFile').on('change', function(e) { 
         let fileName = '';
         if (e.target.files && e.target.files.length > 1) {
             fileName = e.target.files.length + ' dosya seçildi';

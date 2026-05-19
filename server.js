@@ -1,10 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
+const chatController = require('./controllers/chatController');
+
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -23,7 +26,14 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } // Set true in production with HTTPS
+    store: (MongoStore.create || MongoStore.default.create)({
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 14 * 24 * 60 * 60 // 14 days
+    }),
+    cookie: { 
+        maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
+        secure: false // Set true in production with HTTPS
+    }
 }));
 
 // Global variables for views
@@ -55,6 +65,10 @@ app.use(async (req, res, next) => {
     
     next();
 });
+
+// Chat Routes
+app.get('/chat/messages', chatController.getMessages);
+app.post('/chat/send', chatController.sendMessage);
 
 // Routes
 app.use('/', require('./routes/indexRoutes'));

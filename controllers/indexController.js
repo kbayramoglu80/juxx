@@ -4,15 +4,16 @@ const Category = require('../models/Category');
 
 exports.getHome = async (req, res) => {
     try {
-        const products = await Product.find().sort({ createdAt: -1 }).limit(8);
+        const products = await Product.find().sort({ createdAt: -1 }).limit(100);
         const popularProducts = await Product.find({ isPopular: true }).limit(5);
         const heroBanners = await Banner.find({ type: 'hero' }).sort({ order: 1 });
         const middleBanners = await Banner.find({ type: 'middle' }).sort({ order: 1 });
+        const categories = await Category.find().sort({ name: 1 });
         
-        res.render('index', { products, popularProducts, heroBanners, middleBanners });
+        res.render('index', { products, popularProducts, heroBanners, middleBanners, categories });
     } catch (err) {
         console.error(err);
-        res.render('index', { products: [], popularProducts: [], heroBanners: [], middleBanners: [] });
+        res.render('index', { products: [], popularProducts: [], heroBanners: [], middleBanners: [], categories: [] });
     }
 };
 

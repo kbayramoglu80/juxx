@@ -3,10 +3,15 @@ const Order = require('../models/Order');
 
 exports.getProfile = async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.session.user._id || req.session.user.id;
         
         // Fetch user data excluding password
         const user = await User.findById(userId).select('-password');
+        
+        if (!user) {
+            req.session.user = null;
+            return res.redirect('/auth/login');
+        }
         
         // Fetch user's orders and populate product details
         const orders = await Order.find({ user: userId })
@@ -32,7 +37,7 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const userId = req.session.user.id;
+        const userId = req.session.user._id || req.session.user.id;
         const { name, phone, address } = req.body;
 
         await User.findByIdAndUpdate(userId, {
@@ -45,11 +50,16 @@ exports.updateProfile = async (req, res) => {
         req.session.user.name = name;
         
         req.session.successMessage = 'Profil bilgileriniz başarıyla güncellendi.';
-        res.redirect('/user/profile');
+        req.session.save(err => {
+            if (err) console.error(err);
+            res.redirect('/user/profile');
+        });
 
     } catch (err) {
         console.error(err);
         req.session.errorMessage = 'Bilgiler güncellenirken bir hata oluştu.';
-        res.redirect('/user/profile');
+        req.session.save(err2 => {
+            res.redirect('/user/profile');
+        });
     }
 };

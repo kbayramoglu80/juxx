@@ -35,8 +35,10 @@
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            max-height: 500px;
-            object-fit: cover;
+            max-height: 550px;
+            width: 100%;
+            object-fit: contain;
+            background: #f9f9f9;
         }
         .product-img-box img:hover {
             transform: scale(1.03);
@@ -186,21 +188,32 @@
                             <div class="pdp-thumb active media-thumb" onclick="changeMedia(this, '<%= product.imageUrl %>', 'image')">
                                 <img src="<%= product.imageUrl %>" alt="">
                             </div>
-                            <!-- DB Images -->
-                            <% if (product.images && product.images.length > 0) { %>
-                                <% product.images.sort((a,b) => a.order - b.order).forEach((img) => { %>
-                                    <div class="pdp-thumb media-thumb" onclick="changeMedia(this, '<%= img.url %>', 'image')">
-                                        <img src="<%= img.url %>" alt="">
+                            <!-- Combined & Sorted DB Images & Video -->
+                            <% 
+                              let allMedia = [];
+                              if (product.images && product.images.length > 0) {
+                                  product.images.forEach(img => {
+                                      allMedia.push({ type: 'image', url: img.url, order: img.order || 0 });
+                                  });
+                              }
+                              if (product.videoUrl) {
+                                  let vOrder = (product.videoOrder !== undefined && product.videoOrder !== null) ? product.videoOrder : 99;
+                                  allMedia.push({ type: 'video', url: product.videoUrl, order: vOrder });
+                              }
+                              allMedia.sort((a,b) => a.order - b.order);
+                            %>
+                            <% allMedia.forEach(media => { %>
+                                <% if (media.type === 'image') { %>
+                                    <div class="pdp-thumb media-thumb" onclick="changeMedia(this, '<%= media.url %>', 'image')">
+                                        <img src="<%= media.url %>" alt="">
                                     </div>
-                                <% }); %>
-                            <% } %>
-                            <!-- Video Thumb -->
-                            <% if (product.videoUrl) { %>
-                                <div class="pdp-thumb media-thumb video-thumb" onclick="changeMedia(this, '<%= product.videoUrl %>', 'video')">
-                                    <div class="video-overlay"><i class="fas fa-play"></i></div>
-                                    <img src="<%= product.imageUrl %>" alt="Video" style="filter: brightness(0.6);">
-                                </div>
-                            <% } %>
+                                <% } else if (media.type === 'video') { %>
+                                    <div class="pdp-thumb media-thumb video-thumb" onclick="changeMedia(this, '<%= media.url %>', 'video')">
+                                        <div class="video-overlay"><i class="fas fa-play"></i></div>
+                                        <img src="<%= product.imageUrl %>" alt="Video" style="filter: brightness(0.6);">
+                                    </div>
+                                <% } %>
+                            <% }); %>
                         </div>
                     </div>
                 </div>

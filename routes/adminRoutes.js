@@ -39,4 +39,12 @@ router.post('/categories/add', adminController.addCategory);
 router.post('/categories/edit/:id', adminController.editCategory);
 router.get('/categories/delete/:id', adminController.deleteCategory);
 
+// Support Routes
+router.get('/support', adminController.getSupport);
+router.get('/support/messages/:userId', adminController.getUserMessages);
+router.post('/support/send', adminController.sendAdminMessage);
+router.put('/support/message/:id', adminController.editChatMessage);
+router.delete('/support/message/:id', adminController.deleteChatMessage);
+router.post('/support/end-chat/:userId', adminController.endChat);
+
 module.exports = router;

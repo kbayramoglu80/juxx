@@ -13,7 +13,7 @@
                             <% if (error) { %>
                                 <div class="alert alert-danger"><%= error %></div>
                             <% } %>
-                            <form class="row contact_form" action="/auth/login" method="post" novalidate="novalidate">
+                            <form class="row contact_form" action="/login" method="post" novalidate="novalidate">
                                 <div class="col-md-12 form-group p_star">
                                     <input type="email" class="form-control" id="email" name="email" value=""
                                         placeholder="E-posta">
@@ -28,7 +28,7 @@
                                     </button>
                                 </div>
                                 <div class="col-md-12 text-center mt-4">
-                                    <a href="/auth/register" style="color: #4a4a4a; font-weight: 500;">Sitemize Yeni Misiniz? <span style="color: #ff3368; font-weight: bold;">Hemen Kayıt Olun</span></a>
+                                    <a href="/register" style="color: #4a4a4a; font-weight: 500;">Sitemize Yeni Misiniz? <span style="color: #ff3368; font-weight: bold;">Hemen Kayıt Olun</span></a>
                                 </div>
                             </form>
                         </div>

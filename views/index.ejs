@@ -36,22 +36,37 @@
 <!--? New Arrival Start -->
 <div class="new-arrival">
     <div class="container">
-        <!-- Section tittle -->
-        <div class="row justify-content-center">
-            <div class="col-xl-7 col-lg-8 col-md-10">
-                <div class="section-tittle mb-60 text-center wow fadeInUp" data-wow-duration="2s" data-wow-delay=".2s">
-                    <h2>Yeni<br>Gelenler</h2>
+        <!-- Section title & Sorting Dropdown -->
+        <div class="row justify-content-center mb-40">
+            <div class="col-xl-7 col-lg-8 col-md-10 text-center">
+                <div class="section-tittle mb-20 wow fadeInUp" data-wow-duration="2s" data-wow-delay=".2s">
+                    <h2>Yeni Gelenler</h2>
+                </div>
+                <!-- Premium Sorting Dropdown -->
+                <div class="sorting-wrapper wow fadeInUp" data-wow-duration="1.5s" data-wow-delay=".3s" style="margin-top: 15px; margin-bottom: 25px;">
+                    <label for="homeProductSort" style="font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: #c49b45; margin-right: 8px; text-transform: uppercase;">Sıralama:</label>
+                    <select id="homeProductSort" style="background-color: #ffffff; color: #1a1a1a; border: 1px solid #c49b45; padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(196, 155, 69, 0.1);">
+                        <option value="newest" selected>En Yeniler (Varsayılan)</option>
+                        <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
+                        <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
+                    </select>
                 </div>
             </div>
         </div>
-        <div class="premium-grid">
+        <div class="premium-grid" id="homeProductGrid">
             <% if (typeof products !== 'undefined' && products.length > 0) { %>
-                <% products.forEach(product => { %>
-                    <div class="premium-card wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                <% products.forEach((product, index) => { 
+                    const isHidden = index >= 16;
+                %>
+                    <div class="premium-card <%= isHidden ? 'premium-card-hidden' : '' %> wow fadeInUp" 
+                         data-wow-duration="1s" 
+                         data-wow-delay=".1s"
+                         data-price="<%= product.price %>"
+                         data-date="<%= product.createdAt ? product.createdAt.getTime() : 0 %>"
+                         style="<%= isHidden ? 'display: none !important;' : '' %>">
                         <div class="premium-card-img-wrapper">
                             <a href="/product/<%= product._id %>">
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
-                                <!-- Mock secondary image for hover -->
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                             </a>
                             <button class="fav-btn"><i class="far fa-heart"></i></button>
@@ -78,10 +93,10 @@
                 </div>
             <% } %>
         </div>
-        <!-- Button -->
-        <div class="row justify-content-center">
-            <div class="room-btn">
-                <a href="/shop" class="border-btn">Daha Fazla Gör</a>
+        <!-- Expandable Show More Button -->
+        <div class="row justify-content-center" style="margin-top: 40px; margin-bottom: 20px;">
+            <div class="room-btn" id="showMoreContainer" style="<%= (typeof products !== 'undefined' && products.length <= 16) ? 'display: none;' : 'display: flex;' %>">
+                <button id="btnShowMore" class="border-btn" style="background: transparent; cursor: pointer; border: 1px solid #c49b45; padding: 15px 35px; font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 2px; transition: all 0.3s ease; border-radius: 4px;">Daha Fazla Göster</button>
             </div>
         </div>
     </div>
@@ -103,30 +118,26 @@
                         flex: 0 0 20%;
                         max-width: 20%;
                     }
-                }
-            </style>
-            <div class="row justify-content-center">
-                <% if (typeof popularProducts !== 'undefined' && popularProducts.length > 0) { %>
-                    <% popularProducts.forEach(product => { %>
+                   <div class="row justify-content-center">
+                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
+                    <% categories.slice(0, 5).forEach((cat, index) => { 
+                        let imgUrl = `/assets/img/gallery/popular${(index % 5) + 1}.png`;
+                    %>
                         <div class="col-fifth col-md-4 col-sm-6">
-                            <div class="single-popular-items mb-50 text-center wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                            <div class="single-popular-items mb-50 text-center wow fadeInUp" data-wow-duration="1s" data-wow-delay="<%= 0.1 * (index + 1) %>s">
                                 <div class="popular-img">
-                                    <img src="<%= product.imageUrl %>" alt="">
+                                    <img src="<%= imgUrl %>" alt="<%= cat.name %>" onerror="this.src='/assets/img/gallery/popular1.png'">
                                     <div class="img-cap">
-                                        <span><%= product.category %></span>
+                                        <span><%= cat.name %></span>
                                     </div>
                                     <div class="favorit-items">
-                                     <a href="/product/<%= product._id %>" class="btn">İncele</a>
-                                 </div>
-                             </div>
-                             <div class="popular-caption mt-10">
-                                 <h4><a href="/product/<%= product._id %>" class="gold-text"><%= product.name %></a></h4>
-                             </div>
-                         </div>
-                     </div>
+                                        <a href="/shop?category=<%= cat.slug %>" class="btn">İncele</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     <% }); %>
                 <% } else { %>
-                    <!-- Default items if none are marked popular -->
                     <div class="col-fifth col-md-4 col-sm-6">
                         <div class="single-popular-items mb-50 text-center">
                             <div class="popular-img">
@@ -242,8 +253,8 @@
                         <img src="/assets/img/icon/services3.svg" alt="">
                     </div>
                     <div class="cat-cap">
-                        <h5>Para İade Garantisi</h5>
-                        <p>14 gün içinde iade imkanı</p>
+                        <h5>Mağazamızı Ziyaret Edin</h5>
+                        <p>Kapalıçarşı mağazamızı ziyaret edebilirsiniz</p>
                     </div>
                 </div>
             </div>
@@ -253,8 +264,8 @@
                         <img src="/assets/img/icon/services4.svg" alt="">
                     </div>
                     <div class="cat-cap">
-                        <h5>7/24 Destek</h5>
-                        <p>Müşteri hizmetlerimiz her an yanınızda</p>
+                        <h5>Uzman Kadro Desteği</h5>
+                        <p>Uzman kadromuzla 7/24 destek vermeye hazırız</p>
                     </div>
                 </div>
             </div>
@@ -262,6 +273,108 @@
     </div>
 </div>
 <!--? Services Area End -->
+<style>
+/* Custom CSS styling for premium sort dropdown and hidden items */
+.premium-card-hidden {
+    display: none !important;
+}
+
+#homeProductSort {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    border: 1px solid #c49b45;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 4px 10px rgba(196, 155, 69, 0.15);
+    transition: all 0.3s ease;
+}
+
+#homeProductSort:hover {
+    border-color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#btnShowMore:hover {
+    background-color: #c49b45 !important;
+    color: #ffffff !important;
+    border-color: #c49b45 !important;
+    box-shadow: 0 4px 15px rgba(196, 155, 69, 0.4);
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const grid = document.getElementById('homeProductGrid');
+    const sortSelect = document.getElementById('homeProductSort');
+    const btnShowMore = document.getElementById('btnShowMore');
+    const showMoreContainer = document.getElementById('showMoreContainer');
+    
+    let visibleLimit = 16;
+    
+    function updateVisibility() {
+        if (!grid) return;
+        const cards = Array.from(grid.querySelectorAll('.premium-card'));
+        cards.forEach((card, index) => {
+            if (index < visibleLimit) {
+                card.style.setProperty('display', 'block', 'important');
+                card.classList.remove('premium-card-hidden');
+            } else {
+                card.style.setProperty('display', 'none', 'important');
+                card.classList.add('premium-card-hidden');
+            }
+        });
+        
+        if (showMoreContainer) {
+            if (visibleLimit >= cards.length) {
+                showMoreContainer.style.setProperty('display', 'none', 'important');
+            } else {
+                showMoreContainer.style.setProperty('display', 'flex', 'important');
+            }
+        }
+    }
+    
+    function sortProducts(sortBy) {
+        if (!grid) return;
+        const cards = Array.from(grid.querySelectorAll('.premium-card'));
+        
+        cards.sort((a, b) => {
+            if (sortBy === 'price-asc') {
+                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+            } else if (sortBy === 'price-desc') {
+                return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+            } else {
+                // newest
+                return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
+            }
+        });
+        
+        cards.forEach(card => grid.appendChild(card));
+        
+        visibleLimit = 16;
+        updateVisibility();
+    }
+    
+    if (sortSelect) {
+        $(sortSelect).on('change', function() {
+            sortProducts(this.value);
+        });
+    }
+    
+    if (btnShowMore) {
+        btnShowMore.addEventListener('click', function() {
+            visibleLimit += 16;
+            updateVisibility();
+        });
+    }
+    
+    updateVisibility();
+});
+</script>
 </main>
 
 <%- include('partials/footer') %>
