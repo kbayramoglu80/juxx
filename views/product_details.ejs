@@ -225,9 +225,9 @@
                         <h1 class="pdp-title"><%= product.name %></h1>
                         
                         <div class="pdp-price-area">
-                            <span class="pdp-current-price" id="pdp-price" data-base="<%= product.price %>">₺ <%= product.price %></span>
+                            <span class="pdp-current-price" id="pdp-price" data-base="<%= product.price %>">₺ <%= product.price.toLocaleString('tr-TR') %></span>
                             <% if (product.price > 1000) { %>
-                                <span class="pdp-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                <span class="pdp-old-price">₺ <%= Math.round(product.price * 1.2).toLocaleString('tr-TR') %></span>
                             <% } %>
                             <span class="pdp-installment">PayTR ile 12 aya varan taksit imkanı</span>
                         </div>
@@ -236,26 +236,36 @@
                             <%= product.description %>
                         </div>
 
-                        <!-- VARIATIONS (MOCK UI) -->
+                        <!-- DİNAMİK METAL RENKLERİ -->
+                        <% if (product.metalColor) { %>
                         <div class="variation-group">
-                            <div class="variation-label">Altın Rengi <span id="color-label">Beyaz Altın</span></div>
+                            <div class="variation-label">Altın Rengi <span id="color-label"><%= product.metalColor %></span></div>
                             <div class="swatch-list">
-                                <div class="swatch-color swatch-white-gold active" onclick="selectVariation(this, 'color', 'Beyaz Altın')" title="Beyaz Altın"></div>
-                                <div class="swatch-color swatch-yellow-gold" onclick="selectVariation(this, 'color', 'Sarı Altın')" title="Sarı Altın"></div>
-                                <div class="swatch-color swatch-rose-gold" onclick="selectVariation(this, 'color', 'Rose Altın')" title="Rose Altın"></div>
+                                <% if (product.metalColor === 'Beyaz Altın') { %>
+                                    <div class="swatch-color swatch-white-gold active" onclick="selectVariation(this, 'color', 'Beyaz Altın')" title="Beyaz Altın"></div>
+                                <% } else if (product.metalColor === 'Sarı Altın') { %>
+                                    <div class="swatch-color swatch-yellow-gold active" onclick="selectVariation(this, 'color', 'Sarı Altın')" title="Sarı Altın"></div>
+                                <% } else if (product.metalColor === 'Rose Gold' || product.metalColor === 'Rose Altın') { %>
+                                    <div class="swatch-color swatch-rose-gold active" onclick="selectVariation(this, 'color', 'Rose Gold')" title="Rose Gold"></div>
+                                <% } else { %>
+                                    <span class="badge badge-light" style="padding: 6px 12px; font-weight: bold; background: #f0f0f0; border-radius: 4px;"><%= product.metalColor %></span>
+                                <% } %>
                             </div>
                         </div>
+                        <% } %>
 
+                        <% if (product.caratOptions && product.caratOptions.length > 0) { %>
                         <div class="variation-group">
-                            <div class="variation-label">Karat Büyüklüğü <span id="carat-label">0.30 Karat</span></div>
+                            <div class="variation-label">Karat Büyüklüğü <small class="text-muted">(Seçim İsteğe Bağlıdır)</small> <span id="carat-label">Seçilmedi</span></div>
                             <div class="pill-list">
-                                <div class="pill-item" onclick="selectVariation(this, 'carat', '0.10', 0.8)">0.10 ct</div>
-                                <div class="pill-item" onclick="selectVariation(this, 'carat', '0.20', 0.9)">0.20 ct</div>
-                                <div class="pill-item active" onclick="selectVariation(this, 'carat', '0.30', 1.0)">0.30 ct</div>
-                                <div class="pill-item" onclick="selectVariation(this, 'carat', '0.50', 1.5)">0.50 ct</div>
-                                <div class="pill-item" onclick="selectVariation(this, 'carat', '1.00', 2.8)">1.00 ct</div>
+                                <% product.caratOptions.forEach(opt => { %>
+                                    <div class="pill-item" onclick="selectCaratOption(this, '<%= opt.carat %>', '<%= opt.price %>')"><%= opt.carat %> ct</div>
+                                <% }); %>
+                                <div class="pill-item active" id="pill-default-carat" onclick="selectCaratOption(this, '', '<%= product.price %>')">Seçimi Kaldır</div>
                             </div>
                         </div>
+                        <% } %>
+                        <input type="hidden" id="selected-carat-input" value="">
 
                         <div class="variation-group">
                             <div class="variation-label">Yüzük Ölçüsü <span>Ölçünüzü Seçin</span></div>
@@ -330,6 +340,7 @@ function updateQty(change) {
 async function handleCartAction(productId, isBuyNow) {
     const qtyInput = document.getElementById('qty-input');
     const quantity = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+    const selectedCarat = document.getElementById('selected-carat-input').value;
     
     // UI Feedback
     const btnCart = document.querySelector('.btn-premium-secondary');
@@ -349,7 +360,8 @@ async function handleCartAction(productId, isBuyNow) {
             },
             body: JSON.stringify({
                 productId: productId,
-                quantity: quantity
+                quantity: quantity,
+                selectedCarat: selectedCarat || undefined
             })
         });
         
@@ -378,6 +390,39 @@ function resetButtons(btnCart, btnBuy) {
     if (btnBuy) btnBuy.innerHTML = 'Hemen Satın Al';
 }
 
+function selectCaratOption(element, carat, price) {
+    // Aktif class'ları güncelle
+    element.parentElement.querySelectorAll('.pill-item').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Label ve input'u güncelle
+    const caratLabel = document.getElementById('carat-label');
+    const inputVal = document.getElementById('selected-carat-input');
+    const priceEl = document.getElementById('pdp-price');
+    const oldPriceEl = document.querySelector('.pdp-old-price');
+    
+    if (carat) {
+        caratLabel.innerText = carat + ' ct';
+        inputVal.value = carat;
+    } else {
+        caratLabel.innerText = 'Seçilmedi';
+        inputVal.value = '';
+    }
+
+    // Fiyatı güncelle
+    const parsedPrice = parseFloat(price);
+    const formattedPrice = parsedPrice.toLocaleString('tr-TR');
+    priceEl.innerText = '₺ ' + formattedPrice;
+
+    if (oldPriceEl) {
+        if (parsedPrice > 1000) {
+            oldPriceEl.style.display = 'inline';
+            oldPriceEl.innerText = '₺ ' + Math.round(parsedPrice * 1.2).toLocaleString('tr-TR');
+        } else {
+            oldPriceEl.style.display = 'none';
+        }
+    }
+}
 
 function selectVariation(element, type, value, priceMultiplier = null) {
     element.parentElement.querySelectorAll(type === 'color' ? '.swatch-color' : '.pill-item').forEach(el => el.classList.remove('active'));
@@ -388,7 +433,7 @@ function selectVariation(element, type, value, priceMultiplier = null) {
         const priceEl = document.getElementById('pdp-price');
         const basePrice = parseFloat(priceEl.getAttribute('data-base'));
         const newPrice = Math.round(basePrice * priceMultiplier);
-        priceEl.innerText = '₺ ' + newPrice;
+        priceEl.innerText = '₺ ' + newPrice.toLocaleString('tr-TR');
     }
 }
 

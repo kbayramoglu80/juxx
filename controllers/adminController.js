@@ -4,6 +4,8 @@ const User = require('../models/User');
 const Banner = require('../models/Banner');
 const Category = require('../models/Category');
 const Message = require('../models/Message');
+const HomeSetting = require('../models/HomeSetting');
+const HomeSection = require('../models/HomeSection');
 
 // Support / Chat Methods
 exports.getSupport = async (req, res) => {
@@ -424,15 +426,19 @@ exports.deleteBanner = async (req, res) => {
 
 // Kategori Yönetimi
 exports.getCategories = async (req, res) => {
-    const categories = await Category.find().sort({ name: 1 });
+    const categories = await Category.find().sort({ order: 1, name: 1 });
     res.render('admin/categories', { categories });
 };
 
 exports.addCategory = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, order } = req.body;
         const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-        const newCategory = new Category({ name, slug });
+        const newCategory = new Category({ 
+            name, 
+            slug, 
+            order: parseInt(order) || 0 
+        });
         await newCategory.save();
         res.redirect('/admin/categories');
     } catch (err) {
@@ -443,9 +449,13 @@ exports.addCategory = async (req, res) => {
 
 exports.editCategory = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, order } = req.body;
         const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-        await Category.findByIdAndUpdate(req.params.id, { name, slug });
+        await Category.findByIdAndUpdate(req.params.id, { 
+            name, 
+            slug, 
+            order: parseInt(order) || 0 
+        });
         res.redirect('/admin/categories');
     } catch (err) {
         console.error(err);
@@ -456,4 +466,113 @@ exports.editCategory = async (req, res) => {
 exports.deleteCategory = async (req, res) => {
     await Category.findByIdAndDelete(req.params.id);
     res.redirect('/admin/categories');
+};
+
+// Anasayfa Ayarları
+exports.getHomeSettings = async (req, res) => {
+    try {
+        // En az 1 ayar belgesi olduğundan emin ol
+        let setting = await HomeSetting.findOne();
+        if (!setting) {
+            setting = new HomeSetting();
+            await setting.save();
+        }
+
+        const sections = await HomeSection.find().populate('products').sort({ order: 1 });
+        const products = await Product.find().sort({ name: 1 });
+
+        res.render('admin/home_settings', { 
+            setting, 
+            sections, 
+            products 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(err.message);
+    }
+};
+
+exports.updateHomeSettings = async (req, res) => {
+    try {
+        const { 
+            newArrivalTitle,
+            service1Title, service1Desc,
+            service2Title, service2Desc,
+            service3Title, service3Desc,
+            service4Title, service4Desc
+        } = req.body;
+
+        let setting = await HomeSetting.findOne();
+        if (!setting) {
+            setting = new HomeSetting();
+        }
+
+        setting.newArrivalTitle = newArrivalTitle;
+        setting.service1Title = service1Title;
+        setting.service1Desc = service1Desc;
+        setting.service2Title = service2Title;
+        setting.service2Desc = service2Desc;
+        setting.service3Title = service3Title;
+        setting.service3Desc = service3Desc;
+        setting.service4Title = service4Title;
+        setting.service4Desc = service4Desc;
+
+        await setting.save();
+        res.redirect('/admin/home-settings?msg=success');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/home-settings?msg=error');
+    }
+};
+
+// Dinamik Bölüm Yönetimi
+exports.addHomeSection = async (req, res) => {
+    try {
+        const { title, order, products } = req.body;
+        const productIds = products 
+            ? (Array.isArray(products) ? products : [products])
+            : [];
+            
+        const newSection = new HomeSection({
+            title,
+            order: parseInt(order) || 0,
+            products: productIds
+        });
+
+        await newSection.save();
+        res.redirect('/admin/home-settings?msg=success');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/home-settings?msg=error');
+    }
+};
+
+exports.editHomeSection = async (req, res) => {
+    try {
+        const { title, order, products } = req.body;
+        const productIds = products 
+            ? (Array.isArray(products) ? products : [products])
+            : [];
+
+        await HomeSection.findByIdAndUpdate(req.params.id, {
+            title,
+            order: parseInt(order) || 0,
+            products: productIds
+        });
+
+        res.redirect('/admin/home-settings?msg=success');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/home-settings?msg=error');
+    }
+};
+
+exports.deleteHomeSection = async (req, res) => {
+    try {
+        await HomeSection.findByIdAndDelete(req.params.id);
+        res.redirect('/admin/home-settings?msg=success');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/home-settings?msg=error');
+    }
 };

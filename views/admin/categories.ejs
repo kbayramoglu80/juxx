@@ -23,6 +23,7 @@
         <div class="col-md-2 sidebar">
             <h4 class="text-center gold-text mb-4">MI DIAMOND ADMIN</h4>
             <a href="/admin"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+            <a href="/admin/home-settings"><i class="fas fa-home mr-2"></i> Ana Sayfa Yönetimi</a>
             <a href="/admin/products"><i class="fas fa-gem mr-2"></i> Ürünler</a>
             <a href="/admin/categories" class="active"><i class="fas fa-list mr-2"></i> Kategoriler</a>
             <a href="/admin/orders"><i class="fas fa-shopping-cart mr-2"></i> Siparişler</a>
@@ -45,6 +46,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th>Sıra No</th>
                                 <th>Kategori Adı</th>
                                 <th>Slug</th>
                                 <th>İşlemler</th>
@@ -53,10 +55,11 @@
                         <tbody>
                             <% categories.forEach(category => { %>
                                 <tr>
+                                    <td><span class="badge badge-warning text-dark font-weight-bold" style="font-size: 0.95rem; padding: 5px 12px;"><%= category.order || 0 %></span></td>
                                     <td><%= category.name %></td>
                                     <td><%= category.slug %></td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editCategoryModal" onclick="populateEditCategory('<%= category._id %>', '<%= category.name %>')"><i class="fas fa-edit"></i></a>
+                                        <a href="#" class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editCategoryModal" onclick="populateEditCategory('<%= category._id %>', '<%= category.name %>', '<%= category.order || 0 %>')"><i class="fas fa-edit"></i></a>
                                         <a href="/admin/categories/delete/<%= category._id %>" class="btn btn-sm btn-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')"><i class="fas fa-trash"></i></a>
                                     </td>
                                 </tr>
@@ -81,9 +84,13 @@
             </div>
             <form action="/admin/categories/add" method="POST">
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label>Kategori Adı</label>
                         <input type="text" name="name" class="form-control" placeholder="Örn: Yüzükler" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sıralama Sırası (Order)</label>
+                        <input type="number" name="order" class="form-control" value="0" min="0" placeholder="Küçük sayılar daha önce gösterilir" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -107,9 +114,13 @@
             </div>
             <form id="editCategoryForm" action="" method="POST">
                 <div class="modal-body">
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label>Kategori Adı</label>
                         <input type="text" id="editCategoryName" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sıralama Sırası (Order)</label>
+                        <input type="number" id="editCategoryOrder" name="order" class="form-control" min="0" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -124,8 +135,9 @@
 <script src="/assets/js/vendor/jquery-1.12.4.min.js"></script>
 <script src="/assets/js/bootstrap.min.js"></script>
 <script>
-    function populateEditCategory(id, name) {
+    function populateEditCategory(id, name, order) {
         document.getElementById('editCategoryName').value = name;
+        document.getElementById('editCategoryOrder').value = order;
         document.getElementById('editCategoryForm').action = '/admin/categories/edit/' + id;
     }
 </script>

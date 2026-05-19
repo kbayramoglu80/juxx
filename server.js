@@ -58,7 +58,7 @@ app.use(async (req, res, next) => {
     
     try {
         const Category = require('./models/Category');
-        res.locals.globalCategories = await Category.find().sort({ name: 1 });
+        res.locals.globalCategories = await Category.find().sort({ order: 1, name: 1 });
     } catch (err) {
         res.locals.globalCategories = [];
     }

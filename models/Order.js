@@ -20,6 +20,10 @@ const orderSchema = new mongoose.Schema({
         price: {
             type: Number,
             required: true
+        },
+        selectedCarat: {
+            type: Number,
+            default: null
         }
     }],
     totalAmount: {

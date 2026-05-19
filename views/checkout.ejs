@@ -39,10 +39,21 @@
                             
                             <hr>
                             <h2>Sipariş Özeti</h2>
-                            <ul class="list list_2">
-                                <li>
-                                    <a href="#">Genel Toplam
-                                        <span>₺ <%= cartTotal.toFixed(2) %></span>
+                            <ul class="list list_2 mb-4" style="list-style: none; padding-left: 0;">
+                                <% cart.forEach(item => { %>
+                                    <li class="d-flex justify-content-between mb-2" style="font-size: 0.95rem; color: #555;">
+                                        <span><%= item.name %> 
+                                            <% if (item.selectedCarat) { %>
+                                                <small class="badge badge-secondary ml-1" style="background: #e8e0d0; color: #8a7355;"><%= item.selectedCarat %> ct</small>
+                                            <% } %>
+                                            x <%= item.quantity %>
+                                        </span>
+                                        <span style="font-weight: 600;">₺ <%= (item.price * item.quantity).toLocaleString('tr-TR') %></span>
+                                    </li>
+                                <% }); %>
+                                <li class="border-top pt-3 mt-2">
+                                    <a href="#" class="d-flex justify-content-between font-weight-bold" style="color: #1a1a1a; font-size: 1.1rem;">Genel Toplam
+                                        <span>₺ <%= cartTotal.toLocaleString('tr-TR') %></span>
                                     </a>
                                 </li>
                             </ul>

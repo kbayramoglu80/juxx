@@ -1,6 +1,8 @@
 const Product = require('../models/Product');
 const Banner = require('../models/Banner');
 const Category = require('../models/Category');
+const HomeSetting = require('../models/HomeSetting');
+const HomeSection = require('../models/HomeSection');
 
 exports.getHome = async (req, res) => {
     try {
@@ -8,12 +10,36 @@ exports.getHome = async (req, res) => {
         const popularProducts = await Product.find({ isPopular: true }).limit(5);
         const heroBanners = await Banner.find({ type: 'hero' }).sort({ order: 1 });
         const middleBanners = await Banner.find({ type: 'middle' }).sort({ order: 1 });
-        const categories = await Category.find().sort({ name: 1 });
+        const categories = await Category.find().sort({ order: 1, name: 1 });
         
-        res.render('index', { products, popularProducts, heroBanners, middleBanners, categories });
+        let setting = await HomeSetting.findOne();
+        if (!setting) {
+            setting = new HomeSetting();
+            await setting.save();
+        }
+
+        const sections = await HomeSection.find().populate('products').sort({ order: 1 });
+        
+        res.render('index', { 
+            products, 
+            popularProducts, 
+            heroBanners, 
+            middleBanners, 
+            categories,
+            setting,
+            sections
+        });
     } catch (err) {
         console.error(err);
-        res.render('index', { products: [], popularProducts: [], heroBanners: [], middleBanners: [], categories: [] });
+        res.render('index', { 
+            products: [], 
+            popularProducts: [], 
+            heroBanners: [], 
+            middleBanners: [], 
+            categories: [],
+            setting: new HomeSetting(),
+            sections: []
+        });
     }
 };
 
@@ -130,17 +156,31 @@ exports.getCart = (req, res) => {
 
 exports.addToCart = async (req, res) => {
     try {
-        const { productId, quantity } = req.body;
+        const { productId, quantity, selectedCarat } = req.body;
         const product = await Product.findById(productId);
         
         if (!product) {
             return res.status(404).json({ success: false, message: 'Ürün bulunamadı' });
         }
         
-        const cart = req.session.cart || [];
-        const existingItemIndex = cart.findIndex(item => item.productId === productId);
-        
         const qty = parseInt(quantity) || 1;
+        const caratVal = selectedCarat ? parseFloat(selectedCarat) : null;
+        
+        // Karat seçeneğine göre birim fiyat belirleme
+        let itemPrice = product.price;
+        if (caratVal && product.caratOptions && product.caratOptions.length > 0) {
+            const opt = product.caratOptions.find(o => o.carat === caratVal);
+            if (opt) {
+                itemPrice = opt.price;
+            }
+        }
+        
+        const cart = req.session.cart || [];
+        // Hem ürün ID'si hem de seçilen karat eşleşmelidir
+        const existingItemIndex = cart.findIndex(item => 
+            item.productId === productId && 
+            (caratVal ? item.selectedCarat === caratVal : !item.selectedCarat)
+        );
         
         if (existingItemIndex >= 0) {
             cart[existingItemIndex].quantity += qty;
@@ -148,8 +188,9 @@ exports.addToCart = async (req, res) => {
             cart.push({
                 productId: product._id.toString(),
                 name: product.name,
-                price: product.price,
+                price: itemPrice,
                 imageUrl: product.imageUrl,
+                selectedCarat: caratVal,
                 quantity: qty
             });
         }
@@ -164,9 +205,16 @@ exports.addToCart = async (req, res) => {
 
 exports.removeFromCart = (req, res) => {
     try {
-        const { productId } = req.body;
+        const { productId, selectedCarat } = req.body;
+        const caratVal = selectedCarat ? parseFloat(selectedCarat) : null;
+        
         if (req.session.cart) {
-            req.session.cart = req.session.cart.filter(item => item.productId !== productId);
+            req.session.cart = req.session.cart.filter(item => {
+                const isSameProduct = item.productId === productId;
+                const isSameCarat = caratVal ? (item.selectedCarat === caratVal) : (!item.selectedCarat);
+                // Eşleşen satırı çıkart
+                return !(isSameProduct && isSameCarat);
+            });
         }
         res.redirect('/cart');
     } catch (err) {

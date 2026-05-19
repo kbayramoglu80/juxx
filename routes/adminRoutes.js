@@ -34,6 +34,13 @@ router.post('/categories/add', adminController.addCategory);
 router.post('/categories/edit/:id', adminController.editCategory);
 router.get('/categories/delete/:id', adminController.deleteCategory);
 
+// Ana Sayfa Yönetim Rotaları
+router.get('/home-settings', adminController.getHomeSettings);
+router.post('/home-settings/update', adminController.updateHomeSettings);
+router.post('/home-sections/add', adminController.addHomeSection);
+router.post('/home-sections/edit/:id', adminController.editHomeSection);
+router.get('/home-sections/delete/:id', adminController.deleteHomeSection);
+
 // Support Routes
 router.get('/support', adminController.getSupport);
 router.get('/support/messages/:userId', adminController.getUserMessages);

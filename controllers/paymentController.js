@@ -43,7 +43,12 @@ exports.createPaymentToken = async (req, res) => {
         // Siparişi veritabanına "Pending" olarak kaydet
         const newOrder = new Order({
             user: req.session.user ? (req.session.user._id || req.session.user.id) : null,
-            items: req.session.cart.map(item => ({ product: item.productId, quantity: item.quantity, price: item.price })),
+            items: req.session.cart.map(item => ({ 
+                product: item.productId, 
+                quantity: item.quantity, 
+                price: item.price,
+                selectedCarat: item.selectedCarat || null
+            })),
             totalAmount: cartTotal,
             shippingAddress: user_address + " - " + user_phone + " - " + user_name,
             merchant_oid: merchant_oid,
