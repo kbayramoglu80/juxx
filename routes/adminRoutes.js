@@ -11,17 +11,12 @@ router.use(isAdmin); // Diğer tüm admin rotaları için isAdmin kontrolü
 
 router.get('/', adminController.getDashboard);
 router.get('/products', adminController.getProducts);
-router.post('/products/add', upload.fields([
-    { name: 'imageFile', maxCount: 1 },
-    { name: 'galleryImages', maxCount: 10 },
-    { name: 'videoFile', maxCount: 1 }
-]), adminController.addProduct);
 
-router.post('/products/edit/:id', upload.fields([
-    { name: 'imageFile', maxCount: 1 },
-    { name: 'galleryImages', maxCount: 10 },
-    { name: 'videoFile', maxCount: 1 }
-]), adminController.editProduct);
+// AJAX ön-yükleme: tek dosyayı Cloudinary'ye yükler, URL döner
+router.post('/upload-temp', upload.single('file'), adminController.uploadTemp);
+
+router.post('/products/add', upload.single('imageFile'), adminController.addProduct);
+router.post('/products/edit/:id', upload.single('imageFile'), adminController.editProduct);
 router.get('/products/delete/:id', adminController.deleteProduct);
 
 router.get('/orders', adminController.getOrders);

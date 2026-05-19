@@ -1,42 +1,30 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, '../public/uploads/products');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Cloudinary yapılandırması
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Set storage engine
-const storage = multer.memoryStorage();
-
-// Check file type
-function checkFileType(file, cb) {
-    // Allowed ext
-    const filetypes = /jpeg|jpg|png|webp|gif|mp4|webm/;
-    // Check ext
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    // Check mime
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb(new Error('Sadece resim veya video dosyaları yüklenebilir!'));
-    }
-}
-
-// Initialize upload
-const upload = multer({
-    storage: storage,
-    limits: { 
-        fileSize: 50000000, // 50MB file limit
-        fieldSize: 50000000 // 50MB field limit (for large base64 image strings)
-    },
-    fileFilter: function (req, file, cb) {
-        checkFileType(file, cb);
+// Cloudinary storage — resource_type: 'auto' ile her dosya türünü otomatik algılar
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+        const isVideo = file.mimetype.startsWith('video/');
+        return {
+            folder:        isVideo ? 'mucevher-video' : 'mucevher-urun',
+            resource_type: 'auto'   // Cloudinary otomatik algılar (image/video/raw)
+        };
     }
 });
 
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 200 * 1024 * 1024 } // 200MB
+});
+
 module.exports = upload;
+module.exports.cloudinary = cloudinary;

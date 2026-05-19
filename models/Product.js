@@ -46,6 +46,64 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // --- Mücevher Özellikleri (İsteğe Bağlı) ---
+    productCode: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    metal: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    metalColor: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    gemType: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    caratWeight: {
+        type: Number,
+        default: null
+    },
+    caratRange: {
+        type: String,
+        default: ''
+    },
+    // --- Çoklu Karat Seçenekleri ---
+    // Her seçenek: { carat: 1.08, price: 29990 }
+    caratOptions: {
+        type: [{
+            carat: { type: Number, required: true },
+            price: { type: Number, required: true }
+        }],
+        default: []
+    },
+    gemColor: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    gemClarity: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    gemCut: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    certificate: {
+        type: String,
+        trim: true,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

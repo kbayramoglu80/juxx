@@ -20,18 +20,124 @@
     
     <!-- Latest Products Start -->
     <section class="latest-product-area padding-bottom">
-        <div class="container">
-            <div class="row product-btn d-flex justify-content-end align-items-end">
-                <!-- Section Tittle -->
-                <div class="col-xl-4 col-lg-5 col-md-5">
-                    <div class="section-tittle mb-30">
-                        <h2>Ürünler</h2>
+        <div class="container-fluid px-4">
+            <div class="row">
+                <!-- Filtre Sidebar -->
+                <div class="col-lg-3 col-md-4 mb-4">
+                    <div class="filter-sidebar" style="background:#fff; border:1px solid #eee; border-radius:12px; padding:24px; position:sticky; top:20px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 style="font-weight:700; font-size:16px; color:#1a1a1a; margin:0;">🔍 Filtreler</h5>
+                            <a href="/shop" style="font-size:12px; color:#999;">Temizle</a>
+                        </div>
+                        <form method="GET" action="/shop" id="filterForm">
+                            <!-- Arama -->
+                            <div class="filter-group mb-4">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Ürün Ara</label>
+                                <div class="input-group">
+                                    <input type="text" name="ara" class="form-control form-control-sm" placeholder="İsim veya ürün kodu..." value="<%= activeFilters && activeFilters.ara ? activeFilters.ara : '' %>">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-sm btn-dark" type="submit"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Karat Aralığı -->
+                            <div class="filter-group mb-4">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">💎 Karat Ağırlığı</label>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="karat" id="karatAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.karat ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="karatAll" style="font-size:13px;">Tümü</label>
+                                </div>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="karat" id="karatUnder" value="under0.5" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === 'under0.5' ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="karatUnder" style="font-size:13px;">0.50 ct altı</label>
+                                </div>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="karat" id="karatMid" value="0.5-1" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === '0.5-1' ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="karatMid" style="font-size:13px;">0.50 – 1.00 ct</label>
+                                </div>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="karat" id="karatPlus" value="1plus" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === '1plus' ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="karatPlus" style="font-size:13px;">1.00 ct ve üzeri</label>
+                                </div>
+                            </div>
+                            <!-- Taş Rengi -->
+                            <div class="filter-group mb-4">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Taş Rengi</label>
+                                <% ['D','E','F','G','H'].forEach(r => { %>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="renk" id="renk<%= r %>" value="<%= r %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.renk === r ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="renk<%= r %>" style="font-size:13px;"><%= r %></label>
+                                </div>
+                                <% }); %>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="renk" id="renkAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.renk ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="renkAll" style="font-size:13px; color:#999;">Tümü</label>
+                                </div>
+                            </div>
+                            <!-- Berraklık -->
+                            <div class="filter-group mb-4">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Berraklık</label>
+                                <% ['IF','VVS1','VVS2','VS1','VS2'].forEach(b => { %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="berraklik" id="berraklik<%= b %>" value="<%= b %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.berraklik === b ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="berraklik<%= b %>" style="font-size:13px;"><%= b %></label>
+                                </div>
+                                <% }); %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="berraklik" id="berraklikAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.berraklik ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="berraklikAll" style="font-size:13px; color:#999;">Tümü</label>
+                                </div>
+                            </div>
+                            <!-- Kesim -->
+                            <div class="filter-group mb-4">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Kesim / Şekil</label>
+                                <% ['Round','Marquise','Oval','Princess','Pear','Emerald','Cushion','Heart'].forEach(k => { %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="kesim" id="kesim<%= k %>" value="<%= k %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.kesim === k ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="kesim<%= k %>" style="font-size:13px;"><%= k %></label>
+                                </div>
+                                <% }); %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="kesim" id="kesimAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.kesim ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="kesimAll" style="font-size:13px; color:#999;">Tümü</label>
+                                </div>
+                            </div>
+                            <!-- Metal -->
+                            <div class="filter-group mb-4">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Maden</label>
+                                <% [['14k Altın','14k-altin'],['18k Altın','18k-altin'],['Gümüş','gumus'],['Platin','platin']].forEach(m => { %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="metal" id="metal<%= m[1] %>" value="<%= m[0] %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.metal === m[0] ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="metal<%= m[1] %>" style="font-size:13px;"><%= m[0] %></label>
+                                </div>
+                                <% }); %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="metal" id="metalAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.metal ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="metalAll" style="font-size:13px; color:#999;">Tümü</label>
+                                </div>
+                            </div>
+                            <!-- Sertifika -->
+                            <div class="filter-group mb-3">
+                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Sertifika</label>
+                                <% ['IGI','GIA','HRD'].forEach(s => { %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="sertifika" id="sertifika<%= s %>" value="<%= s %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.sertifika === s ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="sertifika<%= s %>" style="font-size:13px;"><%= s %></label>
+                                </div>
+                                <% }); %>
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="radio" name="sertifika" id="sertifikaAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.sertifika ? 'checked' : '' %>>
+                                    <label class="form-check-label" for="sertifikaAll" style="font-size:13px; color:#999;">Tümü</label>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <div class="col-xl-8 col-lg-7 col-md-7">
-                    <div class="properties__button f-right">
-                        <!--Nav Button  -->
-                        <nav>                                                                                                
+                <!-- Ürün Listesi -->
+                <div class="col-lg-9 col-md-8">
+                    <!-- Kategori Sekmeleri -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <nav>
                             <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                 <a class="nav-item nav-link <%= currentCategory === 'Hepsi' ? 'active' : '' %>" href="/shop">Hepsi</a>
                                 <% categories.forEach(cat => { %>
@@ -39,10 +145,9 @@
                                 <% }); %>
                             </div>
                         </nav>
-                        <!--End Nav Button  -->
+                        <span class="text-muted" style="font-size:13px;"><%= products.length %> ürün bulundu</span>
                     </div>
-                </div>
-            </div>
+
             <!-- Nav Card -->
             <div class="tab-content" id="nav-tabContent">
                 <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
@@ -195,14 +300,15 @@
                         <div class="row">
                             <div class="col-12 text-center py-5">
                                 <i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 20px;"></i>
-                                <h3 style="font-weight: 700; color: #555;">Bu kategoride ürün bulunamadı.</h3>
+                                <h3 style="font-weight: 700; color: #555;">Arama kriterlerine uygun ürün bulunamadı.</h3>
+                                <a href="/shop" class="btn btn-dark mt-3">Tüm Ürünleri Gör</a>
                             </div>
                         </div>
                     <% } %>
-                </div>
-            </div>
-            <!-- End Nav Card -->
-        </div>
+                </div><!-- /tab-content -->
+            </div><!-- /col-lg-9 ürün listesi -->
+        </div><!-- /row -->
+        </div><!-- /container-fluid -->
     </section>
     <!-- Latest Products End -->
 </main>

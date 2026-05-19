@@ -93,9 +93,7 @@ exports.endChat = async (req, res) => {
 
 
 
-const bufferToBase64 = (file) => {
-    return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-};
+
 
 exports.getDashboard = async (req, res) => {
     try {
@@ -167,64 +165,104 @@ const parseTurkishPrice = (priceVal) => {
     return isNaN(parsed) ? 0 : parsed;
 };
 
+
+// AJAX ile tek dosyayı Cloudinary'ye yükler ve URL döner
+exports.uploadTemp = async (req, res) => {
+    try {
+        if (req.file) {
+            return res.json({ success: true, url: req.file.path });
+        }
+        res.json({ success: false, message: 'Dosya bulunamadı.' });
+    } catch (err) {
+        res.json({ success: false, message: err.message });
+    }
+};
+
 exports.addProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock, isPopular, existingImages, existingImagesOrder, videoOrder } = req.body;
+        const { 
+            name, description, price, category, stock, isPopular, 
+            existingImages, existingImagesOrder, videoUrl, videoOrder,
+            productCode, metal, metalColor, gemType, caratWeight,
+            gemColor, gemClarity, gemCut, certificate
+        } = req.body;
         
-        let imageUrl = '/assets/img/gallery/popular1.png'; // default
-        let images = [];
-        let videoUrl = '';
-
-        if (req.files) {
-            if (req.files.imageFile && req.files.imageFile.length > 0) {
-                imageUrl = bufferToBase64(req.files.imageFile[0]);
-            }
-            if (req.files.videoFile && req.files.videoFile.length > 0) {
-                videoUrl = bufferToBase64(req.files.videoFile[0]);
-            }
+        // Ana görsel: doğrudan dosya yüklemesi (multer → Cloudinary)
+        let imageUrl = '/assets/img/gallery/popular1.png';
+        if (req.file) {
+            imageUrl = req.file.path;
         }
 
-        // Process client-side base64 gallery images & their orders (similar to editProduct)
+        // Galeri görselleri: AJAX ile önceden yüklendi, body'den URL olarak gelir
+        let images = [];
         if (existingImages) {
             const keptImages = Array.isArray(existingImages) ? existingImages : [existingImages];
             const keptImagesOrder = existingImagesOrder 
                 ? (Array.isArray(existingImagesOrder) ? existingImagesOrder : [existingImagesOrder])
                 : [];
-            
             keptImages.forEach((url, index) => {
-                const orderVal = (keptImagesOrder && keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
-                    ? parseInt(keptImagesOrder[index]) 
-                    : index;
+                if (!url) return;
+                const orderVal = (keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
+                    ? parseInt(keptImagesOrder[index]) : index;
                 images.push({ url, order: orderVal });
             });
         }
 
-        let parsedVideoOrder = 99;
-        if (videoUrl) {
-            parsedVideoOrder = (videoOrder !== undefined && videoOrder !== '') ? parseInt(videoOrder) : 99;
-        }
+        // Video URL: AJAX ön-yükleme ile Cloudinary'ye yüklendi
+        const finalVideoUrl = videoUrl || '';
+        const parsedVideoOrder = (videoOrder !== undefined && videoOrder !== '') ? parseInt(videoOrder) : 99;
 
         const parsedPrice = parseTurkishPrice(price);
 
-        console.log('--- ADD PRODUCT ATTEMPT ---');
-        console.log('Body:', req.body);
-        console.log('Parsed Price:', parsedPrice);
-        console.log('Files:', req.files ? Object.keys(req.files) : 'No files');
+        // Karat hesaplama aralığı (tek karat için)
+        let parsedCarat = null;
+        let caratRange = '';
+        if (caratWeight && caratWeight !== '') {
+            parsedCarat = parseFloat(caratWeight);
+            if (!isNaN(parsedCarat)) {
+                if (parsedCarat < 0.5) caratRange = 'under0.5';
+                else if (parsedCarat < 1.0) caratRange = '0.5-1';
+                else caratRange = '1plus';
+            } else {
+                parsedCarat = null;
+            }
+        }
+
+        // Çoklu karat seçeneklerini işle
+        let caratOptions = [];
+        const caratCarats = req.body.caratOptionsCarats;
+        const caratPrices = req.body.caratOptionsPrices;
+        if (caratCarats) {
+            const caratsArr = Array.isArray(caratCarats) ? caratCarats : [caratCarats];
+            const pricesArr = caratPrices ? (Array.isArray(caratPrices) ? caratPrices : [caratPrices]) : [];
+            caratsArr.forEach((c, i) => {
+                const cVal = parseFloat(c);
+                const pVal = parseTurkishPrice(pricesArr[i] || '0');
+                if (!isNaN(cVal) && cVal > 0) {
+                    caratOptions.push({ carat: cVal, price: pVal });
+                }
+            });
+        }
 
         const newProduct = new Product({ 
-            name, 
-            description, 
-            price: parsedPrice, 
-            category, 
-            stock, 
-            imageUrl, 
-            images,
-            videoUrl,
+            name, description, price: parsedPrice, category, stock, 
+            imageUrl, images,
+            videoUrl: finalVideoUrl,
             videoOrder: parsedVideoOrder,
-            isPopular: isPopular === 'on' 
+            isPopular: isPopular === 'on',
+            productCode: productCode || '',
+            metal: metal || '',
+            metalColor: metalColor || '',
+            gemType: gemType || '',
+            caratWeight: parsedCarat,
+            caratRange,
+            caratOptions,
+            gemColor: gemColor || '',
+            gemClarity: gemClarity || '',
+            gemCut: gemCut || '',
+            certificate: certificate || ''
         });
         await newProduct.save();
-        console.log('Product saved successfully:', newProduct._id);
         res.redirect('/admin/products?msg=success');
     } catch (err) {
         console.error('ADD PRODUCT ERROR:', err);
@@ -234,55 +272,87 @@ exports.addProduct = async (req, res) => {
 
 exports.editProduct = async (req, res) => {
     try {
-        const { name, description, price, category, stock, isPopular, existingImages, videoOrder, deleteVideo } = req.body;
+        const { 
+            name, description, price, category, stock, isPopular, 
+            existingImages, videoUrl, videoOrder, deleteVideo,
+            productCode, metal, metalColor, gemType, caratWeight,
+            gemColor, gemClarity, gemCut, certificate
+        } = req.body;
         
         const parsedPrice = parseTurkishPrice(price);
 
+        let parsedCarat = null;
+        let caratRange = '';
+        if (caratWeight && caratWeight !== '') {
+            parsedCarat = parseFloat(caratWeight);
+            if (!isNaN(parsedCarat)) {
+                if (parsedCarat < 0.5) caratRange = 'under0.5';
+                else if (parsedCarat < 1.0) caratRange = '0.5-1';
+                else caratRange = '1plus';
+            } else {
+                parsedCarat = null;
+            }
+        }
+
+        // Çoklu karat seçeneklerini işle
+        let caratOptions = [];
+        const caratCarats = req.body.caratOptionsCarats;
+        const caratPrices = req.body.caratOptionsPrices;
+        if (caratCarats) {
+            const caratsArr = Array.isArray(caratCarats) ? caratCarats : [caratCarats];
+            const pricesArr = caratPrices ? (Array.isArray(caratPrices) ? caratPrices : [caratPrices]) : [];
+            caratsArr.forEach((c, i) => {
+                const cVal = parseFloat(c);
+                const pVal = parseTurkishPrice(pricesArr[i] || '0');
+                if (!isNaN(cVal) && cVal > 0) {
+                    caratOptions.push({ carat: cVal, price: pVal });
+                }
+            });
+        }
+
         let updateData = {
-            name, 
-            description, 
-            price: parsedPrice, 
-            category, 
-            stock, 
-            isPopular: isPopular === 'on' 
+            name, description, price: parsedPrice, category, stock,
+            isPopular: isPopular === 'on',
+            productCode: productCode || '',
+            metal: metal || '',
+            metalColor: metalColor || '',
+            gemType: gemType || '',
+            caratWeight: parsedCarat,
+            caratRange,
+            caratOptions,
+            gemColor: gemColor || '',
+            gemClarity: gemClarity || '',
+            gemCut: gemCut || '',
+            certificate: certificate || ''
         };
 
-        // Extract kept existing images in their new sorted order
+        // Ana görsel değiştirildiyse (multer → Cloudinary)
+        if (req.file) {
+            updateData.imageUrl = req.file.path;
+        }
+
+        // Mevcut görselleri sıralı dizi olarak al (drag-drop'tan gelen URL'ler)
         let images = [];
         if (existingImages) {
             const keptImages = Array.isArray(existingImages) ? existingImages : [existingImages];
             const keptImagesOrder = req.body.existingImagesOrder 
                 ? (Array.isArray(req.body.existingImagesOrder) ? req.body.existingImagesOrder : [req.body.existingImagesOrder])
                 : [];
-            
             keptImages.forEach((url, index) => {
+                if (!url) return;
                 const orderVal = (keptImagesOrder && keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
-                    ? parseInt(keptImagesOrder[index]) 
-                    : index;
+                    ? parseInt(keptImagesOrder[index]) : index;
                 images.push({ url, order: orderVal });
             });
         }
-
-        // Process files
-        if (req.files) {
-            if (req.files.imageFile && req.files.imageFile.length > 0) {
-                updateData.imageUrl = bufferToBase64(req.files.imageFile[0]);
-            }
-            
-            // Process new video upload
-            if (req.files.videoFile && req.files.videoFile.length > 0) {
-                updateData.videoUrl = bufferToBase64(req.files.videoFile[0]);
-            }
-        }
-
-        // Save sorted images array
         updateData.images = images;
 
-        // Process video delete or order update
+        // Video: silinecekse temizle, aksi halde body'den gelen URL'yi kullan
         if (deleteVideo === 'true') {
             updateData.videoUrl = '';
             updateData.videoOrder = 99;
         } else {
+            if (videoUrl) updateData.videoUrl = videoUrl;
             if (videoOrder !== undefined && videoOrder !== '') {
                 updateData.videoOrder = parseInt(videoOrder);
             }
@@ -335,7 +405,7 @@ exports.addBanner = async (req, res) => {
         let imageUrl = textImageUrl;
 
         if (req.file) {
-            imageUrl = bufferToBase64(req.file);
+            imageUrl = req.file.path; // Cloudinary URL
         }
 
         const newBanner = new Banner({ type, imageUrl, title, subtitle, link, order });

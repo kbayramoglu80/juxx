@@ -39,6 +39,39 @@
                 <h2>Ürün Yönetimi</h2>
                 <button class="btn btn-warning" data-toggle="modal" data-target="#addProductModal">Yeni Ürün Ekle</button>
             </div>
+
+            <% const msg = typeof query !== 'undefined' ? query.msg : (typeof locals !== 'undefined' && locals.msg ? locals.msg : null); %>
+            <% const urlMsg = (function(){ try { return new URL(require ? 'http://x' : 'http://x').searchParams; } catch(e){ return null; } })(); %>
+            <script>
+            (function(){
+                const p = new URLSearchParams(window.location.search);
+                const msg = p.get('msg');
+                if (msg === 'success') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showAdminAlert('Ürün başarıyla kaydedildi!', 'success');
+                    });
+                } else if (msg === 'doc_too_large') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showAdminAlert('⚠️ Görseller çok büyük! Lütfen daha az veya daha küçük resim ekleyin (max ~4 resim tavsiye edilir).', 'danger');
+                    });
+                } else if (msg === 'video_too_large') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showAdminAlert('⚠️ Video çok büyük! Lütfen 8MB altında bir video yükleyin.', 'danger');
+                    });
+                } else if (msg === 'error') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showAdminAlert('Bir hata oluştu, lütfen tekrar deneyin.', 'danger');
+                    });
+                }
+                function showAdminAlert(text, type) {
+                    const div = document.createElement('div');
+                    div.className = 'alert alert-' + type + ' alert-dismissible fade show';
+                    div.innerHTML = text + '<button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>';
+                    const content = document.querySelector('.main-content');
+                    if (content) content.insertBefore(div, content.firstChild);
+                }
+            })();
+            </script>
             
             <div class="card border-none shadow-sm">
                 <div class="card-body">
@@ -87,70 +120,201 @@
             </div>
             <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Ürün Adı</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Açıklama</label>
-                        <textarea name="description" class="form-control" required></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <!-- Sekmeler -->
+                    <ul class="nav nav-tabs mb-3" id="addProductTabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#addTab1">Temel Bilgiler</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#addTab2">💎 Taş & Maden</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#addTab3">📸 Görseller</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- Sekme 1: Temel Bilgiler -->
+                        <div class="tab-pane fade show active" id="addTab1">
                             <div class="form-group">
-                                <label>Fiyat (₺)</label>
-                                <input type="number" name="price" class="form-control" required>
+                                <label>Ürün Adı</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea name="description" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Fiyat (₺)</label>
+                                        <input type="number" name="price" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Stok</label>
+                                        <input type="number" name="stock" class="form-control" value="1" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select name="category" class="form-control" required>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat._id %>"><%= cat.name %></option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input type="checkbox" name="isPopular" class="form-check-input" id="isPopular">
+                                <label class="form-check-label" for="isPopular">Öne Çıkan Ürün (Ana Sayfada Göster)</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Stok</label>
-                                <input type="number" name="stock" class="form-control" value="1" required>
+                        <!-- Sekme 2: Taş & Maden Bilgileri -->
+                        <div class="tab-pane fade" id="addTab2">
+                            <p class="text-muted small mb-3"><i class="fas fa-info-circle"></i> Tüm alanlar isteğe bağlıdır. Boş bırakılan alanlar ürün sayfasında gösterilmez.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Ürün Kodu</label>
+                                        <input type="text" name="productCode" class="form-control" placeholder="YZ-ALT-RO-1CT-14-Y-123-S">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Sertifika</label>
+                                        <select name="certificate" class="form-control">
+                                            <option value="">-- Seçin (İsteğe Bağlı) --</option>
+                                            <option value="IGI">IGI</option>
+                                            <option value="GIA">GIA</option>
+                                            <option value="HRD">HRD</option>
+                                            <option value="Sertifikasız">Sertifikasız</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Maden</label>
+                                        <select name="metal" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="14k Altın">14k Altın</option>
+                                            <option value="18k Altın">18k Altın</option>
+                                            <option value="Gümüş">Gümüş</option>
+                                            <option value="Platin">Platin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Maden Rengi</label>
+                                        <select name="metalColor" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="Sarı Altın">Sarı Altın</option>
+                                            <option value="Beyaz Altın">Beyaz Altın</option>
+                                            <option value="Rose Gold">Rose Gold</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Değerli Taş Tipi</label>
+                                        <select name="gemType" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="Lab. Pırlanta">Lab. Pırlanta</option>
+                                            <option value="Doğal Pırlanta">Doğal Pırlanta</option>
+                                            <option value="Yakut">Yakut</option>
+                                            <option value="Zümrüt">Zümrüt</option>
+                                            <option value="Safir">Safir</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Karat Ağırlığı (ct)</label>
+                                        <input type="number" name="caratWeight" class="form-control" placeholder="Örn: 1.08" step="0.01" min="0">
+                                        <small class="text-muted">Boş bırakılabilir</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Taş Rengi</label>
+                                        <select name="gemColor" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                            <option value="F">F</option>
+                                            <option value="G">G</option>
+                                            <option value="H">H</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Berraklık</label>
+                                        <select name="gemClarity" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="IF">IF</option>
+                                            <option value="VVS1">VVS1</option>
+                                            <option value="VVS2">VVS2</option>
+                                            <option value="VS1">VS1</option>
+                                            <option value="VS2">VS2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Kesim / Şekil</label>
+                                        <select name="gemCut" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="Round">Round</option>
+                                            <option value="Marquise">Marquise</option>
+                                            <option value="Oval">Oval</option>
+                                            <option value="Princess">Princess</option>
+                                            <option value="Pear">Pear</option>
+                                            <option value="Emerald">Emerald</option>
+                                            <option value="Cushion">Cushion</option>
+                                            <option value="Heart">Heart</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Kategori</label>
-                        <select name="category" class="form-control" required>
-                            <% categories.forEach(cat => { %>
-                                <option value="<%= cat._id %>"><%= cat.name %></option>
-                            <% }); %>
-                        </select>
-                    </div>
-                                        <div class="form-group">
-                        <label>Ana Görsel (Katalog Resmi)</label>
-                        <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="customFile" name="imageFile" accept="image/*" required>
-                            <label class="custom-file-label" for="customFile" style="cursor: pointer;">Dosya Seçin veya Sürükleyin...</label>
+                        <!-- Sekme 3: Görseller -->
+                        <div class="tab-pane fade" id="addTab3">
+                            <div class="form-group">
+                                <label>Ana Görsel (Katalog Resmi)</label>
+                                <div class="custom-file mb-3">
+                                    <input type="file" class="custom-file-input" id="customFile" name="imageFile" accept="image/*" required>
+                                    <label class="custom-file-label" for="customFile">Dosya Seçin veya Sürükleyin...</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Galeri Görselleri <small class="text-muted">(Birden fazla seçilebilir — sürükleyerek sıralayın)</small></label>
+                                <div class="custom-file mb-3">
+                                    <!-- name yok: AJAX ile Cloudinary'ye yüklenir, hidden input ile gönderilir -->
+                                    <input type="file" class="custom-file-input" id="galleryFiles" accept="image/*" multiple>
+                                    <label class="custom-file-label" for="galleryFiles">Birden Fazla Dosya Seçebilirsiniz...</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Ürün Tanıtım Videosu <small class="text-muted">(İsteğe Bağlı)</small></label>
+                                <div class="custom-file mb-3">
+                                    <!-- name yok: AJAX ile Cloudinary'ye yüklenir, hidden input ile gönderilir -->
+                                    <input type="file" class="custom-file-input" id="videoFile" accept="video/mp4,video/webm">
+                                    <label class="custom-file-label" for="videoFile">MP4 veya WebM Video Seçin...</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold gold-text">Galeri & Video Sıralaması <small class="text-muted">(Sürükleyerek sıralayın)</small></label>
+                                <div id="createMediaContainer" class="d-flex flex-wrap gap-2 mt-3" style="min-height: 80px; border: 1px dashed #ced4da; border-radius: 8px; padding: 10px; background-color: #fcfcfc;">
+                                    <span class="text-muted w-100 text-center" id="createMediaEmptyText">Henüz görsel veya video eklenmedi.</span>
+                                </div>
+                                <div id="createMediaHiddenInputs"></div>
+                            </div>
+                        </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Galeri Görselleri (Çoklu Seçim - Slider Sırası İçin)</label>
-                        <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="galleryFiles" accept="image/*" multiple>
-                            <label class="custom-file-label" for="galleryFiles" style="cursor: pointer;">Birden Fazla Dosya Seçebilirsiniz...</label>
-                        </div>
-                        <small class="text-muted">Seçtiğiniz dosyaların sırası, ürün detay sayfasındaki slider sırası olacaktır.</small>
-                    </div>
-                    <div class="form-group">
-                        <label>Ürün Tanıtım Videosu (İsteğe Bağlı)</label>
-                        <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="videoFile" name="videoFile" accept="video/mp4,video/webm">
-                            <label class="custom-file-label" for="videoFile" style="cursor: pointer;">MP4 veya WebM Video Seçin...</label>
-                        </div>
-                    </div>
-                    <!-- Draggable Create Media Grid -->
-                    <div class="form-group">
-                        <label class="font-weight-bold gold-text">Galeri Görselleri ve Tanıtım Videosu Sıralaması</label>
-                        <small class="text-muted d-block mb-2">Seçtiğiniz görsel ve videoları sürükleyip bırakarak dilediğiniz gibi sıralayabilirsiniz.</small>
-                        <div id="createMediaContainer" class="d-flex flex-wrap gap-2 mt-3" style="min-height: 80px; border: 1px dashed #ced4da; border-radius: 8px; padding: 10px; background-color: #fcfcfc;">
-                            <span class="text-muted w-100 text-center" id="createMediaEmptyText">Henüz galeri görseli veya videosu eklenmedi.</span>
-                        </div>
-                        <div id="createMediaHiddenInputs"></div>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input type="checkbox" name="isPopular" class="form-check-input" id="isPopular">
-                        <label class="form-check-label" for="isPopular">Öne Çıkan Ürün (Ana Sayfada Göster)</label>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -164,7 +328,7 @@
 
 <!-- Edit Product Modal -->
 <div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Ürün Düzenle</h5>
@@ -174,72 +338,198 @@
             </div>
             <form id="editProductForm" action="" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label>Ürün Adı</label>
-                        <input type="text" id="editProductName" name="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Açıklama</label>
-                        <textarea id="editProductDescription" name="description" class="form-control" required></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
+                    <!-- Sekmeler -->
+                    <ul class="nav nav-tabs mb-3" id="editProductTabs" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#editTab1">Temel Bilgiler</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#editTab2">💎 Taş & Maden</a></li>
+                        <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#editTab3">📸 Görseller</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <!-- Sekme 1: Temel Bilgiler -->
+                        <div class="tab-pane fade show active" id="editTab1">
                             <div class="form-group">
-                                <label>Fiyat (₺)</label>
-                                <input type="number" id="editProductPrice" name="price" class="form-control" required>
+                                <label>Ürün Adı</label>
+                                <input type="text" id="editProductName" name="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Açıklama</label>
+                                <textarea id="editProductDescription" name="description" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Fiyat (₺)</label>
+                                        <input type="number" id="editProductPrice" name="price" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Stok</label>
+                                        <input type="number" id="editProductStock" name="stock" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="editProductCategory" name="category" class="form-control" required>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat._id %>"><%= cat.name %></option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input type="checkbox" name="isPopular" class="form-check-input" id="editProductIsPopular">
+                                <label class="form-check-label" for="editProductIsPopular">Öne Çıkan Ürün (Ana Sayfada Göster)</label>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Stok</label>
-                                <input type="number" id="editProductStock" name="stock" class="form-control" required>
+                        <!-- Sekme 2: Taş & Maden -->
+                        <div class="tab-pane fade" id="editTab2">
+                            <p class="text-muted small mb-3"><i class="fas fa-info-circle"></i> Tüm alanlar isteğe bağlıdır. Boş bırakılan alanlar ürün sayfasında gösterilmez.</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Ürün Kodu</label>
+                                        <input type="text" id="editProductCode" name="productCode" class="form-control" placeholder="YZ-ALT-RO-1CT-14-Y-123-S">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Sertifika</label>
+                                        <select id="editCertificate" name="certificate" class="form-control">
+                                            <option value="">-- Seçin (İsteğe Bağlı) --</option>
+                                            <option value="IGI">IGI</option>
+                                            <option value="GIA">GIA</option>
+                                            <option value="HRD">HRD</option>
+                                            <option value="Sertifikasız">Sertifikasız</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Maden</label>
+                                        <select id="editMetal" name="metal" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="14k Altın">14k Altın</option>
+                                            <option value="18k Altın">18k Altın</option>
+                                            <option value="Gümüş">Gümüş</option>
+                                            <option value="Platin">Platin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Maden Rengi</label>
+                                        <select id="editMetalColor" name="metalColor" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="Sarı Altın">Sarı Altın</option>
+                                            <option value="Beyaz Altın">Beyaz Altın</option>
+                                            <option value="Rose Gold">Rose Gold</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Değerli Taş Tipi</label>
+                                        <select id="editGemType" name="gemType" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="Lab. Pırlanta">Lab. Pırlanta</option>
+                                            <option value="Doğal Pırlanta">Doğal Pırlanta</option>
+                                            <option value="Yakut">Yakut</option>
+                                            <option value="Zümrüt">Zümrüt</option>
+                                            <option value="Safir">Safir</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Karat Ağırlığı (ct)</label>
+                                        <input type="number" id="editCaratWeight" name="caratWeight" class="form-control" placeholder="Örn: 1.08" step="0.01" min="0">
+                                        <small class="text-muted">Boş bırakılabilir</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Taş Rengi</label>
+                                        <select id="editGemColor" name="gemColor" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="D">D</option>
+                                            <option value="E">E</option>
+                                            <option value="F">F</option>
+                                            <option value="G">G</option>
+                                            <option value="H">H</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Berraklık</label>
+                                        <select id="editGemClarity" name="gemClarity" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="IF">IF</option>
+                                            <option value="VVS1">VVS1</option>
+                                            <option value="VVS2">VVS2</option>
+                                            <option value="VS1">VS1</option>
+                                            <option value="VS2">VS2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Kesim / Şekil</label>
+                                        <select id="editGemCut" name="gemCut" class="form-control">
+                                            <option value="">-- Seçin --</option>
+                                            <option value="Round">Round</option>
+                                            <option value="Marquise">Marquise</option>
+                                            <option value="Oval">Oval</option>
+                                            <option value="Princess">Princess</option>
+                                            <option value="Pear">Pear</option>
+                                            <option value="Emerald">Emerald</option>
+                                            <option value="Cushion">Cushion</option>
+                                            <option value="Heart">Heart</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Kategori</label>
-                        <select id="editProductCategory" name="category" class="form-control" required>
-                            <% categories.forEach(cat => { %>
-                                <option value="<%= cat._id %>"><%= cat.name %></option>
-                            <% }); %>
-                        </select>
-                    </div>
-                                        <div class="form-group">
-                        <label>Yeni Ana Görsel (Değiştirmek isterseniz seçin)</label>
-                        <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="editCustomFile" name="imageFile" accept="image/*">
-                            <label class="custom-file-label" for="editCustomFile" style="cursor: pointer;">Dosya Seçin veya Sürükleyin...</label>
+                        <!-- Sekme 3: Görseller -->
+                        <div class="tab-pane fade" id="editTab3">
+                            <div class="form-group">
+                                <label>Yeni Ana Görsel (Değiştirmek isterseniz seçin)</label>
+                                <div class="custom-file mb-3">
+                                    <input type="file" class="custom-file-input" id="editCustomFile" name="imageFile" accept="image/*">
+                                    <label class="custom-file-label" for="editCustomFile">Dosya Seçin veya Sürükleyin...</label>
+                                </div>
+                                <small class="text-muted">Görsel seçmezseniz eski görsel kullanılmaya devam eder.</small>
+                            </div>
+                            <!-- Draggable Current Media Grid -->
+                            <div class="form-group">
+                                <label class="font-weight-bold">Mevcut Galeri Görselleri ve Video Sıralaması</label>
+                                <div id="editMediaContainer" class="d-flex flex-wrap align-items-center p-3 border rounded bg-white" style="min-height: 110px; gap: 12px;"></div>
+                                <small class="text-muted d-block mt-1">Sürükleyip bırakarak sıralayabilirsiniz. <i class="fas fa-trash-alt text-danger"></i> ile silebilirsiniz.</small>
+                                <div id="editMediaHiddenInputs"></div>
+                                <input type="hidden" name="deleteVideo" id="deleteVideoInput" value="false">
+                            </div>
+                            <div class="form-group">
+                                <label>Yeni Galeri Görselleri Ekle</label>
+                                <div class="custom-file mb-3">
+                                    <input type="file" class="custom-file-input" id="editGalleryFiles" name="galleryImages" accept="image/*" multiple>
+                                    <label class="custom-file-label" for="editGalleryFiles">Birden Fazla Dosya Seçebilirsiniz...</label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Yeni Tanıtım Videosu (Mevcut videoyu değiştirir)</label>
+                                <div class="custom-file mb-3">
+                                    <input type="file" class="custom-file-input" id="editVideoFile" name="videoFile" accept="video/mp4,video/webm">
+                                    <label class="custom-file-label" for="editVideoFile">MP4 veya WebM Video Seçin...</label>
+                                </div>
+                            </div>
                         </div>
-                        <small class="text-muted">Eğer görsel seçmezseniz eski görsel kullanılmaya devam eder.</small>
-                    </div>
-                    <!-- Draggable Current Media Grid -->
-                    <div class="form-group">
-                        <label class="font-weight-bold">Mevcut Galeri Görselleri ve Video Sıralaması</label>
-                        <div id="editMediaContainer" class="d-flex flex-wrap align-items-center p-3 border rounded bg-white" style="min-height: 110px; gap: 12px;"></div>
-                        <small class="text-muted d-block mt-1">Görselleri ve videoyu sürükleyip bırakarak sıralayabilirsiniz. Çöp kutusu <i class="fas fa-trash-alt text-danger"></i> butonuna tıklayarak istemediklerinizi silebilirsiniz. (Videolar mavi çerçeveyle gösterilir)</small>
-                        
-                        <!-- Hidden inputs to serialize final state -->
-                        <div id="editMediaHiddenInputs"></div>
-                        <input type="hidden" name="deleteVideo" id="deleteVideoInput" value="false">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Yeni Galeri Görselleri Ekle (Mevcut olanların sonuna eklenir)</label>
-                        <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="editGalleryFiles" name="galleryImages" accept="image/*" multiple>
-                            <label class="custom-file-label" for="editGalleryFiles" style="cursor: pointer;">Birden Fazla Dosya Seçebilirsiniz...</label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Yeni Tanıtım Videosu (Mevcut videoyu değiştirir)</label>
-                        <div class="custom-file mb-3">
-                            <input type="file" class="custom-file-input" id="editVideoFile" name="videoFile" accept="video/mp4,video/webm">
-                            <label class="custom-file-label" for="editVideoFile" style="cursor: pointer;">MP4 veya WebM Video Seçin...</label>
-                        </div>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input type="checkbox" name="isPopular" class="form-check-input" id="editProductIsPopular">
-                        <label class="form-check-label" for="editProductIsPopular">Öne Çıkan Ürün (Ana Sayfada Göster)</label>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -357,6 +647,13 @@
                 inputOrder.value = index;
                 hiddenContainer.appendChild(inputOrder);
             } else if (item.dataset.type === 'video') {
+                // Video URL'si de kaydedilmeli
+                const inputVideoUrl = document.createElement('input');
+                inputVideoUrl.type = 'hidden';
+                inputVideoUrl.name = 'videoUrl';
+                inputVideoUrl.value = item.dataset.url;
+                hiddenContainer.appendChild(inputVideoUrl);
+
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'videoOrder';
@@ -387,6 +684,13 @@
                 inputOrder.value = index;
                 hiddenContainer.appendChild(inputOrder);
             } else if (item.dataset.type === 'video') {
+                // Video Cloudinary URL'si hidden input olarak gönderilir
+                const inputVideoUrl = document.createElement('input');
+                inputVideoUrl.type = 'hidden';
+                inputVideoUrl.name = 'videoUrl';
+                inputVideoUrl.value = item.dataset.url;
+                hiddenContainer.appendChild(inputVideoUrl);
+
                 const input = document.createElement('input');
                 input.type = 'hidden';
                 input.name = 'videoOrder';
@@ -409,6 +713,18 @@
 
         document.getElementById('editProductIsPopular').checked = product.isPopular;
         document.getElementById('deleteVideoInput').value = 'false';
+
+        // Mücevher alanlarını doldur
+        document.getElementById('editProductCode').value = product.productCode || '';
+        document.getElementById('editCertificate').value = product.certificate || '';
+        document.getElementById('editMetal').value = product.metal || '';
+        document.getElementById('editMetalColor').value = product.metalColor || '';
+        document.getElementById('editGemType').value = product.gemType || '';
+        document.getElementById('editCaratWeight').value = (product.caratWeight !== null && product.caratWeight !== undefined) ? product.caratWeight : '';
+        document.getElementById('editGemColor').value = product.gemColor || '';
+        document.getElementById('editGemClarity').value = product.gemClarity || '';
+        document.getElementById('editGemCut').value = product.gemCut || '';
+
         
         let mediaList = [];
         if (product.images && product.images.length > 0) {
@@ -472,215 +788,127 @@
         serializeMediaState();
     }
 
-    // Helper function to compress large gallery images using HTML5 Canvas
-    function compressAndAddImage(file, container, isEdit) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                
-                // Maximum dimension limit for high quality web optimization
-                const MAX_WIDTH = 1000;
-                const MAX_HEIGHT = 1000;
-                
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
+    // AJAX ile dosyay\u0131 Cloudinary'ye y\u00fckler ve thumbnail olu\u015fturur
+    function uploadAndAddMedia(file, container, isEdit, mediaType) {
+        // \u00d6nce y\u00fckleniyor g\u00f6stergesi ekle
+        const loadingEl = document.createElement('div');
+        loadingEl.className = 'position-relative border border-light rounded shadow-sm d-flex align-items-center justify-content-center bg-light';
+        loadingEl.style.cssText = 'width:80px;height:80px;flex-shrink:0;';
+        loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin text-primary fa-lg"></i>';
+        const emptyCreate = document.getElementById('createMediaEmptyText');
+        if (emptyCreate) emptyCreate.remove();
+        const emptyEdit = container.querySelector('.text-muted');
+        if (emptyEdit && (emptyEdit.innerText.includes('Hen\u00fcz') || emptyEdit.innerText.includes('Bu \u00fcr\u00fcn'))) {
+            container.innerHTML = '';
+        }
+        container.appendChild(loadingEl);
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+            url: '/admin/upload-temp',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                loadingEl.remove();
+                if (!response.success) {
+                    alert('Y\u00fckleme hatas\u0131: ' + (response.message || 'Bilinmeyen hata'));
+                    return;
                 }
-                
-                canvas.width = width;
-                canvas.height = height;
-                
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Compress to JPEG with 0.75 quality - yields tiny file sizes (100KB-200KB instead of 10MB!) with stunning clarity
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
-                
+                const url = response.url;
                 const itemEl = document.createElement('div');
                 itemEl.className = 'position-relative draggable-media-item border border-light rounded shadow-sm';
-                itemEl.style.width = '80px';
-                itemEl.style.height = '80px';
-                itemEl.style.cursor = 'move';
+                itemEl.style.cssText = 'width:80px;height:80px;cursor:move;flex-shrink:0;';
                 itemEl.draggable = true;
-                itemEl.dataset.type = 'image';
-                itemEl.dataset.url = compressedBase64;
-                
-                itemEl.innerHTML = `
-                    <img src="${compressedBase64}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
-                    <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                `;
-                
+                itemEl.dataset.type = mediaType;
+                itemEl.dataset.url = url;
+
+                if (mediaType === 'image') {
+                    itemEl.innerHTML = `
+                        <img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+                        <button type="button" class="btn btn-sm btn-danger position-absolute" style="top:-5px;right:-5px;padding:2px 6px;border-radius:50%;font-size:10px;z-index:10;" onclick="removeMediaItem(this)">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>`;
+                } else {
+                    itemEl.innerHTML = `
+                        <div class="bg-dark text-white d-flex flex-column align-items-center justify-content-center" style="width:100%;height:100%;border-radius:8px;">
+                            <i class="fas fa-video fa-lg text-primary mb-1"></i>
+                            <span style="font-size:8px;font-weight:bold;color:#007bff;">V\u0130DEO</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger position-absolute" style="top:-5px;right:-5px;padding:2px 6px;border-radius:50%;font-size:10px;z-index:10;" onclick="removeMediaItem(this)">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>`;
+                }
+
                 itemEl.addEventListener('dragstart', handleDragStart);
                 itemEl.addEventListener('dragover', handleDragOver);
                 itemEl.addEventListener('drop', handleDrop);
                 itemEl.addEventListener('dragend', handleDragEnd);
-                
                 container.appendChild(itemEl);
-                
+
                 if (isEdit) {
                     serializeMediaState();
                 } else {
                     serializeCreateMediaState();
                 }
-            };
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
+            },
+            error: function() {
+                loadingEl.remove();
+                alert('Cloudinary y\u00fckleme hatas\u0131 olu\u015ftu. \u0130nternet ba\u011flant\u0131n\u0131z\u0131 kontrol edin.');
+            }
+        });
     }
 
-    // Listen for new gallery image selections in CREATE Modal
+    // ADD modal \u2014 galeri g\u00f6rselleri se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
     $('#galleryFiles').on('change', function(e) {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        
         const container = document.getElementById('createMediaContainer');
-        const emptyText = document.getElementById('createMediaEmptyText');
-        if (emptyText) emptyText.remove();
-        
-        const generalEmpty = container.querySelector('.text-muted');
-        if (generalEmpty && generalEmpty.innerText.includes('Henüz galeri')) {
-            generalEmpty.remove();
-        }
-        
         Array.from(files).forEach(file => {
-            compressAndAddImage(file, container, false);
+            uploadAndAddMedia(file, container, false, 'image');
         });
-        
-        const labelText = files.length + ' görsel eklendi. Sıralayabilirsiniz.';
-        $(this).next('.custom-file-label').addClass("selected").html(labelText);
+        $(this).next('.custom-file-label').addClass('selected').html(files.length + ' g\u00f6rsel y\u00fckleniyor...');
+        this.value = ''; // Input'u s\u0131f\u0131rla (ayn\u0131 dosyay\u0131 tekrar se\u00e7ebilmek i\u00e7in)
     });
 
-    // Listen for new video selection in CREATE Modal
+    // ADD modal \u2014 video se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
     $('#videoFile').on('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
         const container = document.getElementById('createMediaContainer');
-        const emptyText = document.getElementById('createMediaEmptyText');
-        if (emptyText) emptyText.remove();
-        
-        const generalEmpty = container.querySelector('.text-muted');
-        if (generalEmpty && generalEmpty.innerText.includes('Henüz galeri')) {
-            generalEmpty.remove();
-        }
-        
-        const existingVideos = container.querySelectorAll('.draggable-media-item');
-        existingVideos.forEach(item => {
-            if (item.dataset.type === 'video') {
-                item.remove();
-            }
-        });
-        
-        const itemEl = document.createElement('div');
-        itemEl.className = 'position-relative draggable-media-item border border-primary rounded shadow-sm';
-        itemEl.style.width = '80px';
-        itemEl.style.height = '80px';
-        itemEl.style.cursor = 'move';
-        itemEl.draggable = true;
-        itemEl.dataset.type = 'video';
-        itemEl.dataset.url = 'NEW_VIDEO_UPLOAD';
-        
-        itemEl.innerHTML = `
-            <div class="bg-dark text-white d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: 100%; border-radius: 8px;">
-                <i class="fas fa-video fa-lg text-primary mb-1"></i>
-                <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; color: #007bff;">YENİ VİDEO</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        `;
-        
-        itemEl.addEventListener('dragstart', handleDragStart);
-        itemEl.addEventListener('dragover', handleDragOver);
-        itemEl.addEventListener('drop', handleDrop);
-        itemEl.addEventListener('dragend', handleDragEnd);
-        
-        container.appendChild(itemEl);
-        serializeCreateMediaState();
-        
-        $(this).next('.custom-file-label').addClass("selected").html('Yeni video eklendi. Sıralayabilirsiniz.');
+        // Varsa eski video thumbnail\u0131n\u0131 kald\u0131r
+        container.querySelectorAll('.draggable-media-item[data-type="video"]').forEach(el => el.remove());
+        uploadAndAddMedia(file, container, false, 'video');
+        $(this).next('.custom-file-label').addClass('selected').html(file.name + ' y\u00fckleniyor...');
+        this.value = '';
     });
 
-    // Listen for new gallery image selections in EDIT Modal
+    // EDIT modal \u2014 yeni galeri g\u00f6rselleri se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
     $('#editGalleryFiles').on('change', function(e) {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        
         const container = document.getElementById('editMediaContainer');
-        const emptyText = container.querySelector('.text-muted');
-        if (emptyText && emptyText.innerText.includes('Bu ürünün henüz')) {
-            container.innerHTML = '';
-        }
-        
         Array.from(files).forEach(file => {
-            compressAndAddImage(file, container, true);
+            uploadAndAddMedia(file, container, true, 'image');
         });
-        
-        const labelText = files.length + ' yeni görsel eklendi. Sıralayabilirsiniz.';
-        $(this).next('.custom-file-label').addClass("selected").html(labelText);
+        $(this).next('.custom-file-label').addClass('selected').html(files.length + ' g\u00f6rsel y\u00fckleniyor...');
+        this.value = '';
     });
 
-    // Listen for new video selection in EDIT Modal
+    // EDIT modal \u2014 video se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
     $('#editVideoFile').on('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        
         const container = document.getElementById('editMediaContainer');
-        const emptyText = container.querySelector('.text-muted');
-        if (emptyText && emptyText.innerText.includes('Bu ürünün henüz')) {
-            container.innerHTML = '';
-        }
-        
-        const existingVideos = container.querySelectorAll('.draggable-media-item');
-        existingVideos.forEach(item => {
-            if (item.dataset.type === 'video') {
-                item.remove();
-            }
-        });
-        
-        const itemEl = document.createElement('div');
-        itemEl.className = 'position-relative draggable-media-item border border-primary rounded shadow-sm';
-        itemEl.style.width = '80px';
-        itemEl.style.height = '80px';
-        itemEl.style.cursor = 'move';
-        itemEl.draggable = true;
-        itemEl.dataset.type = 'video';
-        itemEl.dataset.url = 'NEW_VIDEO_UPLOAD';
-        
-        itemEl.innerHTML = `
-            <div class="bg-dark text-white d-flex flex-column align-items-center justify-content-center" style="width: 100%; height: 100%; border-radius: 8px;">
-                <i class="fas fa-video fa-lg text-primary mb-1"></i>
-                <span style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px; color: #007bff;">YENİ VİDEO</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-danger position-absolute" style="top: -5px; right: -5px; padding: 2px 6px; border-radius: 50%; font-size: 10px; z-index: 10;" onclick="removeMediaItem(this)">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-        `;
-        
-        itemEl.addEventListener('dragstart', handleDragStart);
-        itemEl.addEventListener('dragover', handleDragOver);
-        itemEl.addEventListener('drop', handleDrop);
-        itemEl.addEventListener('dragend', handleDragEnd);
-        
-        container.appendChild(itemEl);
-        document.getElementById('deleteVideoInput').value = 'false';
-        serializeMediaState();
-        
-        $(this).next('.custom-file-label').addClass("selected").html('Yeni video eklendi. Sıralayabilirsiniz.');
+        container.querySelectorAll('.draggable-media-item[data-type="video"]').forEach(el => el.remove());
+        uploadAndAddMedia(file, container, true, 'video');
+        $(this).next('.custom-file-label').addClass('selected').html(file.name + ' y\u00fckleniyor...');
+        this.value = '';
     });
+
 
     // Bootstrap Custom File Input for generic name
     $('.custom-file-input').not('#editGalleryFiles, #editVideoFile, #galleryFiles, #videoFile').on('change', function(e) { 

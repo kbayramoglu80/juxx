@@ -281,6 +281,32 @@
                             <button class="btn-premium-primary" onclick="handleCartAction('<%= product._id %>', true)">Hemen Satın Al</button>
                         </div>
 
+                        <!-- ÜRÜN ÖZELLİKLERİ TABLOSU (sadece dolu alanlar) -->
+                        <%
+                            const specs = [];
+                            if (product.productCode) specs.push(['Ürün Kodu', product.productCode]);
+                            if (product.metal) specs.push(['Maden', product.metal]);
+                            if (product.metalColor) specs.push(['Maden Rengi', product.metalColor]);
+                            if (product.gemType) specs.push(['Değerli Taş', product.gemType]);
+                            if (product.caratWeight != null) specs.push(['Karat Ağırlığı', product.caratWeight + ' ct']);
+                            if (product.gemColor) specs.push(['Taş Rengi', product.gemColor]);
+                            if (product.gemClarity) specs.push(['Berraklık', product.gemClarity]);
+                            if (product.gemCut) specs.push(['Kesim / Şekil', product.gemCut]);
+                            if (product.certificate) specs.push(['Sertifika', product.certificate]);
+                        %>
+                        <% if (specs.length > 0) { %>
+                        <div class="pdp-specs-box" style="margin-top:30px; background:#f9f8f5; border-radius:14px; padding:20px 24px; border:1px solid #e8e0d0;">
+                            <h4 style="font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:2px; color:#1a1a1a; margin-bottom:16px;">Ürün Özellikleri</h4>
+                            <table style="width:100%; border-collapse:collapse;">
+                                <% specs.forEach(([label, value]) => { %>
+                                <tr style="border-bottom:1px solid #ede8df;">
+                                    <td style="padding:10px 0; font-size:13px; color:#888; width:50%; font-weight:600;"><%= label %></td>
+                                    <td style="padding:10px 0; font-size:13px; color:#1a1a1a; font-weight:700;"><%= value %></td>
+                                </tr>
+                                <% }); %>
+                            </table>
+                        </div>
+                        <% } %>
 
                     </div>
                 </div>
@@ -289,6 +315,7 @@
     </section>
     <!-- Product Details End -->
 </main>
+
 
 <script>
 function updateQty(change) {

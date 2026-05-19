@@ -19,12 +19,13 @@ exports.getHome = async (req, res) => {
 
 exports.getShop = async (req, res) => {
     try {
-        const { category } = req.query;
+        const { category, karat, renk, berraklik, kesim, metal, sertifika, ara } = req.query;
         let query = {};
         let pageTitle = 'Mağaza';
         
         const categories = await Category.find().sort({ name: 1 });
         
+        // Kategori filtresi
         if (category) {
             const catObj = await Category.findOne({ slug: category });
             if (catObj) {
@@ -32,12 +33,48 @@ exports.getShop = async (req, res) => {
                 pageTitle = catObj.name;
             }
         }
-        
+
+        // Arama (isim veya ürün kodu)
+        if (ara && ara.trim() !== '') {
+            const searchRegex = new RegExp(ara.trim(), 'i');
+            query.$or = [
+                { name: searchRegex },
+                { productCode: searchRegex }
+            ];
+        }
+
+        // Karat aralığı filtresi
+        if (karat) {
+            if (karat === 'under0.5') query.caratRange = 'under0.5';
+            else if (karat === '0.5-1') query.caratRange = '0.5-1';
+            else if (karat === '1plus') query.caratRange = '1plus';
+        }
+
+        // Taş rengi filtresi
+        if (renk) query.gemColor = renk;
+
+        // Berraklık filtresi
+        if (berraklik) query.gemClarity = berraklik;
+
+        // Kesim filtresi
+        if (kesim) query.gemCut = kesim;
+
+        // Metal filtresi
+        if (metal) query.metal = metal;
+
+        // Sertifika filtresi
+        if (sertifika) query.certificate = sertifika;
+
         const products = await Product.find(query).populate('category').sort({ createdAt: -1 });
-        res.render('shop', { products, categories, currentCategory: category || 'Hepsi', pageTitle });
+        res.render('shop', { 
+            products, categories, 
+            currentCategory: category || 'Hepsi', 
+            pageTitle,
+            activeFilters: { karat, renk, berraklik, kesim, metal, sertifika, ara }
+        });
     } catch (err) {
         console.error(err);
-        res.render('shop', { products: [], categories: [], currentCategory: 'Hepsi', pageTitle: 'Mağaza' });
+        res.render('shop', { products: [], categories: [], currentCategory: 'Hepsi', pageTitle: 'Mağaza', activeFilters: {} });
     }
 };
 
@@ -54,7 +91,8 @@ exports.getCategory = async (req, res) => {
             products, 
             categories, 
             currentCategory: slug,
-            pageTitle: catObj.name 
+            pageTitle: catObj.name,
+            activeFilters: {}
         });
     } catch (err) {
         console.error(err);
