@@ -2,6 +2,29 @@
 <%- include('partials/header') %>
 
 <main>
+    <style>
+        @media (max-width: 991px) {
+            .slider-area {
+                margin-top: 24px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .slider-area .single-slider.slider-height {
+                min-height: 560px !important;
+            }
+
+            .slider-area .hero__caption {
+                padding: 0 12px;
+            }
+
+            .slider-area .hero__caption h1 {
+                font-size: 34px;
+                line-height: 1.2;
+                margin-bottom: 18px;
+            }
+        }
+    </style>
     <!--? Hero Area Start-->
     <div class="container-fluid">
         <div class="slider-area">

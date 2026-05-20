@@ -48,5 +48,31 @@
                 transform: scale(1.04);
             }
         }
+
+        @media (max-width: 767px) {
+            #preloader-active .preloader {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #preloader-active .preloader-inner {
+                width: 100%;
+                text-align: center;
+            }
+
+            #preloader-active .preloader-img {
+                position: static;
+                transform: none;
+                display: block;
+                margin: 0 auto;
+            }
+
+            #preloader-active .preloader-img img {
+                display: block;
+                margin: 0 auto;
+                max-width: 180px !important;
+            }
+        }
     </style>
     <!-- Preloader Start-->
