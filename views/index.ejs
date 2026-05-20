@@ -3,15 +3,28 @@
 
 <main>
     <style>
+        .slider-area .single-slider.slider-height {
+            min-height: 980px !important; /* Masaüstü boyutu büyütüldü */
+        }
+
+        @media (max-width: 1199px) {
+            .slider-area .single-slider.slider-height {
+                min-height: 850px !important;
+            }
+        }
+
         @media (max-width: 991px) {
             .slider-area {
                 margin-top: 24px;
+            }
+            .slider-area .single-slider.slider-height {
+                min-height: 750px !important; /* Tablet boyutu büyütüldü */
             }
         }
 
         @media (max-width: 767px) {
             .slider-area .single-slider.slider-height {
-                min-height: 560px !important;
+                min-height: 660px !important; /* Mobil boyutu büyütüldü */
             }
 
             .slider-area .hero__caption {
@@ -22,6 +35,12 @@
                 font-size: 34px;
                 line-height: 1.2;
                 margin-bottom: 18px;
+            }
+        }
+
+        @media (max-width: 575px) {
+            .slider-area .single-slider.slider-height {
+                min-height: 600px !important; /* Küçük mobil boyutu büyütüldü */
             }
         }
     </style>
@@ -66,9 +85,9 @@
                     <h2><%= typeof setting !== 'undefined' ? (setting.newArrivalTitle || 'Yeni Gelenler') : 'Yeni Gelenler' %></h2>
                 </div>
                 <!-- Premium Sorting Dropdown -->
-                <div class="sorting-wrapper wow fadeInUp" data-wow-duration="1.5s" data-wow-delay=".3s" style="margin-top: 15px; margin-bottom: 25px;">
-                    <label for="homeProductSort" style="font-size: 11px; font-weight: 600; letter-spacing: 1.5px; color: #c49b45; margin-right: 8px; text-transform: uppercase;">Sıralama:</label>
-                    <select id="homeProductSort" style="background-color: #ffffff; color: #1a1a1a; border: 1px solid #c49b45; padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; outline: none; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(196, 155, 69, 0.1);">
+                <div class="sorting-wrapper wow fadeInUp" data-wow-duration="1.5s" data-wow-delay=".3s">
+                    <label for="homeProductSort">Sıralama:</label>
+                    <select id="homeProductSort">
                         <option value="newest" selected>En Yeniler (Varsayılan)</option>
                         <option value="price-asc">Fiyat: Düşükten Yükseğe</option>
                         <option value="price-desc">Fiyat: Yüksekten Düşüğe</option>
@@ -349,24 +368,6 @@
     display: none !important;
 }
 
-#homeProductSort {
-    background-color: #ffffff;
-    color: #1a1a1a;
-    border: 1px solid #c49b45;
-    padding: 8px 20px;
-    border-radius: 25px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-    box-shadow: 0 4px 10px rgba(196, 155, 69, 0.15);
-    transition: all 0.3s ease;
-}
-
-#homeProductSort:hover {
-    border-color: #1a1a1a;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
 
 #btnShowMore:hover {
     background-color: #c49b45 !important;
