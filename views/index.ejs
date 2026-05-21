@@ -112,10 +112,6 @@
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                             </a>
                             <button class="fav-btn"><i class="far fa-heart"></i></button>
-                            <div class="card-actions">
-                                <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
-                                <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
-                            </div>
                         </div>
                         <div class="premium-card-info">
                             <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
@@ -125,6 +121,10 @@
                                 <% if (product.price > 1000) { %>
                                     <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
                                 <% } %>
+                            </div>
+                            <div class="card-actions">
+                                <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
+                                <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
                             </div>
                         </div>
                     </div>
@@ -167,10 +167,6 @@
                                     <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                                 </a>
                                 <button class="fav-btn"><i class="far fa-heart"></i></button>
-                                <div class="card-actions">
-                                    <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
-                                    <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
-                                </div>
                             </div>
                             <div class="premium-card-info">
                                 <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
@@ -180,6 +176,10 @@
                                     <% if (product.price > 1000) { %>
                                         <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
                                     <% } %>
+                                </div>
+                                <div class="card-actions">
+                                    <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
+                                    <button onclick="window.location.href='/product/<%= product._id %>'" class="btn-premium-primary" style="padding: 10px; font-size: 10px;">Sepete Ekle</button>
                                 </div>
                             </div>
                         </div>
