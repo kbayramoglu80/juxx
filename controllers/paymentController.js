@@ -50,7 +50,8 @@ exports.createPaymentToken = async (req, res) => {
                 product: item.productId, 
                 quantity: item.quantity, 
                 price: item.price,
-                selectedCarat: item.selectedCarat || null
+                selectedCarat: item.selectedCarat || null,
+                selectedSize: item.selectedSize || null
             })),
             totalAmount: cartTotal,
             shippingAddress: user_address + " - " + user_phone + " - " + user_name,

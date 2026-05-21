@@ -571,10 +571,24 @@ body {
         left: 0;
         width: 100%;
         background: var(--premium-white);
-        padding: 15px;
+        padding: 12px 15px;
         margin: 0;
         box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
         z-index: 1000;
+        display: flex;
+        gap: 10px;
+    }
+    .pdp-actions .btn-premium-primary, 
+    .pdp-actions .btn-premium-secondary {
+        padding: 12px 8px;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
     }
     .pdp-wrapper {
         margin-bottom: 120px;
@@ -612,7 +626,8 @@ body {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--premium-black);
+    color: var(--premium-white);
     border: none;
     width: 40px;
     height: 40px;
@@ -623,10 +638,10 @@ body {
     cursor: pointer;
     z-index: 10;
     transition: var(--transition-fast);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 .slider-btn:hover {
-    background: var(--premium-black);
+    background: var(--premium-gold);
     color: var(--premium-white);
 }
 .prev-btn { left: 10px; }
@@ -655,7 +670,7 @@ h1, h2, h3, h4, h5, h6,
 .single-popular-items .popular-img .img-cap span,
 .single-question h2,
 .footer-area .footer-tittle h4 {
-    font-family: "Cinzel", serif !important;
+    font-family: "Montserrat", sans-serif !important;
     color: #140C40 !important;
     margin-top: 54px !important;
     font-style: normal !important;
@@ -671,7 +686,7 @@ h1, h2, h3, h4, h5, h6,
 /* Shorten distance between button and heading inside banners, resetting top margins */
 .hero__caption h1,
 .slider-area .single-slider .hero__caption h1 {
-    font-family: "Cinzel", serif !important;
+    font-family: "Montserrat", sans-serif !important;
     color: #140C40 !important;
     font-style: normal !important;
     font-weight: 500 !important;
@@ -1249,5 +1264,183 @@ h1, h2, h3, h4, h5, h6,
 .filter-drawer-header {
     display: none;
 }
+
+/* ==========================================================================
+   Premium Guest Auth Modal for Favorites (Glassmorphism & Lüks Gold/Dark theme)
+   ========================================================================== */
+
+.fav-auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 10, 10, 0.45); /* Elegant darkened backdrop */
+    backdrop-filter: blur(12px); /* Luxury glass blur effect */
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999; /* Top level priority */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+}
+
+.fav-auth-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.fav-auth-modal-content {
+    background: rgba(22, 22, 22, 0.85); /* Premium dark translucent background */
+    border: 1px solid rgba(196, 155, 69, 0.25); /* Sleek gold subtle border */
+    border-radius: 24px;
+    padding: 50px 40px;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+}
+
+.fav-auth-modal.active .fav-auth-modal-content {
+    transform: scale(1);
+}
+
+.fav-auth-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 28px;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.2s ease;
+    line-height: 1;
+    outline: none;
+}
+
+.fav-auth-close-btn:hover {
+    color: #c49b45; /* Turns Gold on hover */
+    transform: rotate(90deg);
+}
+
+.fav-auth-modal-logo {
+    margin-bottom: 25px;
+}
+
+.fav-auth-modal-logo img {
+    height: 55px;
+    width: auto;
+    object-fit: contain;
+}
+
+.fav-auth-modal h3 {
+    font-family: 'Playfair Display', 'Didot', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.fav-auth-modal p {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #cccccc;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+.fav-auth-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.fav-auth-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 50px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+    outline: none;
+    text-align: center;
+}
+
+.fav-auth-btn-primary {
+    background: #c49b45; /* Gold brand color */
+    color: #0b0b0b;
+    border: 1px solid #c49b45;
+}
+
+.fav-auth-btn-primary:hover {
+    background: #e0b863;
+    border-color: #e0b863;
+    color: #0b0b0b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(196, 155, 69, 0.3);
+}
+
+.fav-auth-btn-secondary {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.fav-auth-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Heart toggle pulse micro-animation */
+.fav-pulse {
+    animation: favPulseAnim 0.5s ease-out;
+}
+
+@keyframes favPulseAnim {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* Hover adjustments for standard fav buttons */
+.fav-btn {
+    transition: transform 0.2s ease, opacity 0.2s ease !important;
+}
+
+.fav-btn:hover {
+    transform: scale(1.15) !important;
+}
+
+.fav-btn i.fas.fa-heart.text-danger {
+    color: #e31b23 !important; /* Beautiful pure vibrant red for filled heart */
+}
+
+/* Dynamic styling for PDP favorite button */
+.fav-btn-pdp {
+    border: 2px solid #1a1a1a !important;
+    background-color: #ffffff !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.fav-btn-pdp:hover {
+    border-color: #c49b45 !important;
+    color: #c49b45 !important;
+    background-color: #fff9ed !important;
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 8px 20px rgba(196, 155, 69, 0.12) !important;
+}
+
 
 

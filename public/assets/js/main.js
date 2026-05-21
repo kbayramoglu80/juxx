@@ -47,7 +47,15 @@
       menu.slicknav({
         prependTo: ".mobile_menu",
         closedSymbol: '+',
-        openedSymbol:'-'
+        openedSymbol:'-',
+        afterOpen: function() {
+            var icon = document.querySelector('#mobileMenuBtn i');
+            if (icon) icon.className = 'fas fa-times';
+        },
+        afterClose: function() {
+            var icon = document.querySelector('#mobileMenuBtn i');
+            if (icon) icon.className = 'fas fa-bars';
+        }
       });
     };
 

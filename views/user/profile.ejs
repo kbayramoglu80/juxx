@@ -100,7 +100,17 @@
                                                     <td>
                                                         <ul style="list-style: none; padding: 0; margin: 0;">
                                                             <% order.items.forEach(item => { %>
-                                                                <li style="font-size: 13px;"><%= item.product ? item.product.name : 'Silinmiş Ürün' %> (x<%= item.quantity %>)</li>
+                                                                <li style="font-size: 13px;">
+                                                                    <%= item.product ? item.product.name : 'Silinmiş Ürün' %> (x<%= item.quantity %>)
+                                                                    <% if (item.selectedCarat || item.selectedSize) { %>
+                                                                        <br>
+                                                                        <small class="text-muted" style="font-size: 11px;">
+                                                                            <%= item.selectedCarat ? item.selectedCarat + ' ct' : '' %>
+                                                                            <%= (item.selectedCarat && item.selectedSize) ? ' / ' : '' %>
+                                                                            <%= item.selectedSize ? 'Ölçü: ' + item.selectedSize : '' %>
+                                                                        </small>
+                                                                    <% } %>
+                                                                </li>
                                                             <% }) %>
                                                         </ul>
                                                     </td>

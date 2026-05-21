@@ -33,6 +33,9 @@
                                             <% if (item.selectedCarat) { %>
                                                 <span class="badge badge-warning ml-2" style="font-size: 0.8rem; background: #e8e0d0; color: #8a7355; border-radius: 50px; padding: 4px 10px; font-weight: bold;"><%= item.selectedCarat %> ct</span>
                                             <% } %>
+                                            <% if (item.selectedSize) { %>
+                                                <span class="badge badge-info ml-2" style="font-size: 0.8rem; background: #d0e0e8; color: #55738a; border-radius: 50px; padding: 4px 10px; font-weight: bold;">Ölçü: <%= item.selectedSize %></span>
+                                            <% } %>
                                         </h4>
                                         <p class="mb-2" style="color: #888; font-size: 0.95rem;">Birim Fiyat: ₺ <%= item.price %></p>
                                         <div class="d-flex align-items-center justify-content-between mt-3">
@@ -48,6 +51,7 @@
                                         <form action="/cart/remove" method="POST" class="m-0">
                                             <input type="hidden" name="productId" value="<%= item.productId %>">
                                             <input type="hidden" name="selectedCarat" value="<%= item.selectedCarat || '' %>">
+                                            <input type="hidden" name="selectedSize" value="<%= item.selectedSize || '' %>">
                                             <button type="submit" class="btn" style="background: #fff; color: #dc3545; border: 2px solid #ffeaec; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.3s;" onmouseover="this.style.background='#dc3545'; this.style.color='#fff';" onmouseout="this.style.background='#fff'; this.style.color='#dc3545';" title="Sepetten Çıkar">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>

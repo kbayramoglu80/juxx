@@ -3,6 +3,11 @@
 
 <main>
     <style>
+        /* Hero ile altındaki bölüm arasındaki boşluğu azaltma */
+        .new-arrival.hero-adjacent-section {
+            padding-top: 15px !important;
+        }
+
         .slider-area .single-slider.slider-height {
             min-height: 980px !important; /* Masaüstü boyutu büyütüldü */
         }
@@ -24,7 +29,10 @@
 
         @media (max-width: 767px) {
             .slider-area .single-slider.slider-height {
-                min-height: 660px !important; /* Mobil boyutu büyütüldü */
+                min-height: auto !important;
+                height: 124vw !important; /* Görsel en-boy oranına (928x1152 => ~1.24) göre tam uyum */
+                background-size: cover !important;
+                background-position: center center !important;
             }
 
             .slider-area .single-slider.hero-overly {
@@ -32,11 +40,11 @@
             }
 
             .slider-area .hero__caption {
-                padding: 0 12px;
+                padding: 0 12px !important;
             }
 
             .slider-area .hero__caption h1 {
-                font-size: 34px;
+                font-size: 28px; /* Mobilde daha okunaklı ve dengeli bir yazı boyutu */
                 line-height: 1.2;
                 margin-bottom: 18px;
             }
@@ -44,7 +52,11 @@
 
         @media (max-width: 575px) {
             .slider-area .single-slider.slider-height {
-                min-height: 600px !important; /* Küçük mobil boyutu büyütüldü */
+                min-height: auto !important;
+                height: 124vw !important;
+            }
+            .slider-area .hero__caption h1 {
+                font-size: 24px;
             }
         }
     </style>
@@ -83,7 +95,7 @@
     <!-- End Hero -->
     
 <!--? New Arrival Start -->
-<div class="new-arrival">
+<div class="new-arrival hero-adjacent-section">
     <div class="container">
         <!-- Section title & Sorting Dropdown -->
         <div class="row justify-content-center mb-40">
@@ -118,7 +130,9 @@
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                             </a>
-                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <button class="fav-btn" data-id="<%= product._id %>">
+                                <i class="<%= (typeof userFavorites !== 'undefined' && userFavorites.includes(product._id.toString())) ? 'fas fa-heart text-danger' : 'far fa-heart' %>"></i>
+                            </button>
                         </div>
                         <div class="premium-card-info">
                             <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
@@ -173,7 +187,9 @@
                                     <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="primary-img">
                                     <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                                 </a>
-                                <button class="fav-btn"><i class="far fa-heart"></i></button>
+                                <button class="fav-btn" data-id="<%= product._id %>">
+                                    <i class="<%= (typeof userFavorites !== 'undefined' && userFavorites.includes(product._id.toString())) ? 'fas fa-heart text-danger' : 'far fa-heart' %>"></i>
+                                </button>
                             </div>
                             <div class="premium-card-info">
                                 <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>

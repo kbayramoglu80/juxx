@@ -63,3 +63,53 @@ exports.updateProfile = async (req, res) => {
         });
     }
 };
+
+exports.getFavorites = async (req, res) => {
+    try {
+        const userId = req.session.user._id || req.session.user.id;
+        const user = await User.findById(userId).populate('favorites');
+        
+        res.render('user/favorites', {
+            favorites: user ? user.favorites : []
+        });
+    } catch (err) {
+        console.error('Error fetching favorites page:', err);
+        res.redirect('/');
+    }
+};
+
+exports.toggleFavorite = async (req, res) => {
+    try {
+        const userId = req.session.user._id || req.session.user.id;
+        const { productId } = req.body;
+        
+        if (!productId) {
+            return res.status(400).json({ success: false, message: 'Ürün ID eksik' });
+        }
+        
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'Kullanıcı bulunamadı' });
+        }
+        
+        if (!user.favorites) {
+            user.favorites = [];
+        }
+        
+        const index = user.favorites.indexOf(productId);
+        let action = '';
+        if (index > -1) {
+            user.favorites.splice(index, 1);
+            action = 'removed';
+        } else {
+            user.favorites.push(productId);
+            action = 'added';
+        }
+        
+        await user.save();
+        res.json({ success: true, action: action });
+    } catch (err) {
+        console.error('Error toggling favorite:', err);
+        res.status(500).json({ success: false, message: 'Sunucu hatası' });
+    }
+};

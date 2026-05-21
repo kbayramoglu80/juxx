@@ -69,12 +69,127 @@
                                         </form>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info" title="Detay"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-info" title="Detay" data-toggle="modal" data-target="#orderModal<%= order._id %>"><i class="fas fa-eye"></i></button>
                                     </td>
                                 </tr>
                             <% }); %>
                         </tbody>
                     </table>
+
+                    <!-- Detay Modalları -->
+                    <% orders.forEach(order => { %>
+                        <div class="modal fade" id="orderModal<%= order._id %>" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel<%= order._id %>" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content text-left" style="color: #333;">
+                                    <div class="modal-header bg-dark text-white">
+                                        <h5 class="modal-title" id="orderModalLabel<%= order._id %>" style="color: #d4af37; font-weight: 600;"><i class="fas fa-shopping-bag mr-2"></i> Sipariş Detayı (#<%= order._id.toString().substring(0,8) %>)</h5>
+                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Kapat">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" style="background: #fdfdfd;">
+                                        <!-- Müşteri ve Kargo Bilgileri -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-6 mb-3 mb-md-0">
+                                                <h6 class="border-bottom pb-2 font-weight-bold" style="color: #2c3e50;"><i class="fas fa-user mr-2 text-primary"></i> Müşteri Bilgileri</h6>
+                                                <table class="table table-sm table-borderless">
+                                                    <tr>
+                                                        <td style="width: 100px;"><strong>Ad Soyad:</strong></td>
+                                                        <td><%= order.user ? order.user.name : (order.guestName || 'Misafir') %></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>E-posta:</strong></td>
+                                                        <td><%= order.user ? order.user.email : (order.guestEmail || '-') %></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Telefon:</strong></td>
+                                                        <td><%= order.user ? order.user.phone : (order.guestPhone || '-') %></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Tür:</strong></td>
+                                                        <td><span class="badge badge-<%= order.user ? 'primary' : 'secondary' %>"><%= order.user ? 'Kayıtlı Üye' : 'Ziyaretçi (Misafir)' %></span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6 class="border-bottom pb-2 font-weight-bold" style="color: #2c3e50;"><i class="fas fa-truck mr-2 text-success"></i> Kargo & Ödeme Bilgileri</h6>
+                                                <table class="table table-sm table-borderless">
+                                                    <tr>
+                                                        <td style="width: 120px;"><strong>Kargo Adresi:</strong></td>
+                                                        <td><%= order.shippingAddress %></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Ödeme Durumu:</strong></td>
+                                                        <td><span class="badge badge-<%= order.paymentStatus === 'Paid' ? 'success' : 'warning' %>"><%= order.paymentStatus === 'Paid' ? 'Ödendi' : order.paymentStatus %></span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Sipariş Tarihi:</strong></td>
+                                                        <td><%= order.createdAt.toLocaleString('tr-TR') %></td>
+                                                    </tr>
+                                                    <% if (order.merchant_oid) { %>
+                                                        <tr>
+                                                            <td><strong>Sipariş No (PayTR):</strong></td>
+                                                            <td><code><%= order.merchant_oid %></code></td>
+                                                        </tr>
+                                                    <% } %>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ürün Kalemleri -->
+                                        <h6 class="border-bottom pb-2 font-weight-bold" style="color: #2c3e50;"><i class="fas fa-gem mr-2 text-warning"></i> Satın Alınan Ürünler</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-sm">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th>Görsel</th>
+                                                        <th>Ürün Adı</th>
+                                                        <th>Karat</th>
+                                                        <th>Ölçü</th>
+                                                        <th>Birim Fiyat</th>
+                                                        <th>Adet</th>
+                                                        <th class="text-right">Ara Toplam</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% order.items.forEach(item => { %>
+                                                        <tr>
+                                                            <td class="text-center" style="width: 70px; vertical-align: middle;">
+                                                                <% if (item.product && item.product.imageUrl) { %>
+                                                                    <img src="<%= item.product.imageUrl %>" alt="<%= item.product.name %>" style="max-height: 45px; max-width: 45px; object-fit: contain;" class="rounded border">
+                                                                <% } else { %>
+                                                                    <div style="width: 45px; height: 45px; line-height: 45px; background: #eee; font-size: 10px;" class="text-center text-muted border rounded">Görsel Yok</div>
+                                                                <% } %>
+                                                            </td>
+                                                            <td style="vertical-align: middle;">
+                                                                <% if (item.product) { %>
+                                                                    <a href="/product/<%= item.product._id %>" target="_blank" class="font-weight-bold text-dark"><%= item.product.name %></a>
+                                                                <% } else { %>
+                                                                    <span class="text-danger">Silinmiş Ürün</span>
+                                                                <% } %>
+                                                            </td>
+                                                            <td style="vertical-align: middle;"><%= item.selectedCarat ? item.selectedCarat + ' ct' : '-' %></td>
+                                                            <td style="vertical-align: middle;"><%= item.selectedSize ? item.selectedSize : '-' %></td>
+                                                            <td style="vertical-align: middle;">₺<%= item.price %></td>
+                                                            <td style="vertical-align: middle;"><%= item.quantity %></td>
+                                                            <td style="vertical-align: middle;" class="font-weight-bold text-right">₺<%= item.price * item.quantity %></td>
+                                                        </tr>
+                                                    <% }); %>
+                                                    <tr class="table-info font-weight-bold">
+                                                        <td colspan="6" class="text-right">GENEL TOPLAM:</td>
+                                                        <td class="text-right text-dark" style="font-size: 1.1em;">₺<%= order.totalAmount %></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
                 </div>
             </div>
         </div>

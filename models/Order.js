@@ -37,6 +37,10 @@ const orderSchema = new mongoose.Schema({
         selectedCarat: {
             type: Number,
             default: null
+        },
+        selectedSize: {
+            type: String,
+            default: null
         }
     }],
     totalAmount: {

@@ -133,6 +133,103 @@
 <!-- Jquery Plugins, main Jquery -->	
 <script src="/assets/js/plugins.js"></script>
 <script src="/assets/js/main.js"></script>
+<!-- Premium Guest Auth Modal for Favorites -->
+<div id="favAuthModal" class="fav-auth-modal">
+    <div class="fav-auth-modal-content">
+        <button class="fav-auth-close-btn" onclick="closeFavAuthModal()">&times;</button>
+        <div class="fav-auth-modal-logo">
+            <img src="/assets/img/logo/custom_logo_v2.png" alt="MI DIAMOND">
+        </div>
+        <h3>Favorilere Ekle</h3>
+        <p>Seçtiğiniz bu benzersiz mücevheri favorilerinize eklemek ve sepetinize daha hızlı ulaşmak için lütfen giriş yapın veya kayıt olun.</p>
+        <div class="fav-auth-actions">
+            <a href="/auth/login" class="fav-auth-btn fav-auth-btn-primary">Giriş Yap</a>
+            <a href="/auth/register" class="fav-auth-btn fav-auth-btn-secondary">Üye Ol</a>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    const isUserLoggedIn = <%= user ? 'true' : 'false' %>;
+
+    // Handle Heart Icon Click
+    $(document).on('click', '.fav-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const btn = $(this);
+        const productId = btn.attr('data-id');
+
+        if (!productId) return;
+
+        if (!isUserLoggedIn) {
+            // Guest User: Open Premium Auth Modal
+            openFavAuthModal();
+            return;
+        }
+
+        // Logged In User: AJAX Toggle Favorite
+        btn.prop('disabled', true); // Prevent spamming clicks
+
+        $.ajax({
+            url: '/user/favorites/toggle',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ productId: productId }),
+            success: function(data) {
+                btn.prop('disabled', false);
+                if (data.success) {
+                    const icon = btn.find('i');
+                    if (data.action === 'added') {
+                        icon.removeClass('far fa-heart').addClass('fas fa-heart text-danger');
+                        // Optional pulse animation
+                        btn.addClass('fav-pulse');
+                        setTimeout(() => btn.removeClass('fav-pulse'), 500);
+                    } else {
+                        icon.removeClass('fas fa-heart text-danger').addClass('far fa-heart');
+                        // If we are on the favorites page, remove the card smoothly
+                        const isFavoritesPage = window.location.pathname === '/user/favorites';
+                        if (isFavoritesPage) {
+                            const card = btn.closest('.col-xl-3, .col-lg-4, .col-md-6, .premium-card');
+                            card.fadeOut(400, function() {
+                                $(this).remove();
+                                // Check if no favorites left
+                                if ($('.premium-grid .premium-card').length === 0) {
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                btn.prop('disabled', false);
+                console.error('Favorite toggle error:', error);
+            }
+        });
+    });
+});
+
+function openFavAuthModal() {
+    $('#favAuthModal').addClass('active');
+    $('body').css('overflow', 'hidden'); // Prevent scrolling behind modal
+}
+
+function closeFavAuthModal() {
+    $('#favAuthModal').removeClass('active');
+    $('body').css('overflow', ''); // Restore scrolling
+}
+
+// Close modal if user clicks backdrop
+$(document).ready(function() {
+    $('#favAuthModal').on('click', function(e) {
+        if ($(e.target).hasClass('fav-auth-modal')) {
+            closeFavAuthModal();
+        }
+    });
+});
+</script>
 
 </body>
 </html>

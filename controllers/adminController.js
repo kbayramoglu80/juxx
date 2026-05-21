@@ -375,7 +375,7 @@ exports.deleteProduct = async (req, res) => {
 
 // Sipariş Yönetimi
 exports.getOrders = async (req, res) => {
-    const orders = await Order.find().populate('user').sort({ createdAt: -1 });
+    const orders = await Order.find().populate('user').populate('items.product').sort({ createdAt: -1 });
     res.render('admin/orders', { orders });
 };
 

@@ -156,7 +156,7 @@ exports.getCart = (req, res) => {
 
 exports.addToCart = async (req, res) => {
     try {
-        const { productId, quantity, selectedCarat } = req.body;
+        const { productId, quantity, selectedCarat, selectedSize } = req.body;
         const product = await Product.findById(productId);
         
         if (!product) {
@@ -165,6 +165,7 @@ exports.addToCart = async (req, res) => {
         
         const qty = parseInt(quantity) || 1;
         const caratVal = selectedCarat ? parseFloat(selectedCarat) : null;
+        const sizeVal = selectedSize ? selectedSize.toString().trim() : null;
         
         // Karat seçeneğine göre birim fiyat belirleme
         let itemPrice = product.price;
@@ -176,10 +177,11 @@ exports.addToCart = async (req, res) => {
         }
         
         const cart = req.session.cart || [];
-        // Hem ürün ID'si hem de seçilen karat eşleşmelidir
+        // Hem ürün ID'si hem de seçilen karat ve yüzük ölçüsü eşleşmelidir
         const existingItemIndex = cart.findIndex(item => 
             item.productId === productId && 
-            (caratVal ? item.selectedCarat === caratVal : !item.selectedCarat)
+            (caratVal ? item.selectedCarat === caratVal : !item.selectedCarat) &&
+            (sizeVal ? item.selectedSize === sizeVal : !item.selectedSize)
         );
         
         if (existingItemIndex >= 0) {
@@ -191,6 +193,7 @@ exports.addToCart = async (req, res) => {
                 price: itemPrice,
                 imageUrl: product.imageUrl,
                 selectedCarat: caratVal,
+                selectedSize: sizeVal,
                 quantity: qty
             });
         }
@@ -205,15 +208,17 @@ exports.addToCart = async (req, res) => {
 
 exports.removeFromCart = (req, res) => {
     try {
-        const { productId, selectedCarat } = req.body;
+        const { productId, selectedCarat, selectedSize } = req.body;
         const caratVal = selectedCarat ? parseFloat(selectedCarat) : null;
+        const sizeVal = selectedSize ? selectedSize.toString().trim() : null;
         
         if (req.session.cart) {
             req.session.cart = req.session.cart.filter(item => {
                 const isSameProduct = item.productId === productId;
                 const isSameCarat = caratVal ? (item.selectedCarat === caratVal) : (!item.selectedCarat);
+                const isSameSize = sizeVal ? (item.selectedSize === sizeVal) : (!item.selectedSize);
                 // Eşleşen satırı çıkart
-                return !(isSameProduct && isSameCarat);
+                return !(isSameProduct && isSameCarat && isSameSize);
             });
         }
         res.redirect('/cart');

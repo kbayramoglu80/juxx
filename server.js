@@ -40,6 +40,20 @@ app.use(session({
 app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
     
+    // Fetch user favorites if logged in
+    res.locals.userFavorites = [];
+    if (req.session.user) {
+        try {
+            const User = require('./models/User');
+            const currentUser = await User.findById(req.session.user._id);
+            if (currentUser && currentUser.favorites) {
+                res.locals.userFavorites = currentUser.favorites.map(id => id.toString());
+            }
+        } catch (err) {
+            console.error('Error fetching global favorites:', err);
+        }
+    }
+    
     // Initialize cart if not exists
     if (!req.session.cart) {
         req.session.cart = [];

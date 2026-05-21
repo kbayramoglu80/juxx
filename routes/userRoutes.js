@@ -15,4 +15,8 @@ router.use(isAuthenticated);
 router.get('/profile', userController.getProfile);
 router.post('/profile/update', userController.updateProfile);
 
+// Favorites Routes
+router.get('/favorites', userController.getFavorites);
+router.post('/favorites/toggle', userController.toggleFavorite);
+
 module.exports = router;

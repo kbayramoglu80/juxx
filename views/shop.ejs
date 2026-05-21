@@ -258,7 +258,9 @@
                                 <!-- Mock secondary image for hover -->
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                             </a>
-                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <button class="fav-btn" data-id="<%= product._id %>">
+                                <i class="<%= (typeof userFavorites !== 'undefined' && userFavorites.includes(product._id.toString())) ? 'fas fa-heart text-danger' : 'far fa-heart' %>"></i>
+                            </button>
                         </div>
                         <div class="premium-card-info">
                             <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
@@ -298,7 +300,9 @@
                                 <!-- Mock secondary image for hover -->
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                             </a>
-                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <button class="fav-btn" data-id="<%= product._id %>">
+                                <i class="<%= (typeof userFavorites !== 'undefined' && userFavorites.includes(product._id.toString())) ? 'fas fa-heart text-danger' : 'far fa-heart' %>"></i>
+                            </button>
                         </div>
                         <div class="premium-card-info">
                             <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
@@ -330,7 +334,9 @@
                                 <!-- Mock secondary image for hover -->
                                 <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="secondary-img" style="filter: brightness(0.95);">
                             </a>
-                            <button class="fav-btn"><i class="far fa-heart"></i></button>
+                            <button class="fav-btn" data-id="<%= product._id %>">
+                                <i class="<%= (typeof userFavorites !== 'undefined' && userFavorites.includes(product._id.toString())) ? 'fas fa-heart text-danger' : 'far fa-heart' %>"></i>
+                            </button>
                         </div>
                         <div class="premium-card-info">
                             <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
