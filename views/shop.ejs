@@ -24,110 +24,164 @@
             <div class="row">
                 <!-- Filtre Sidebar -->
                 <div class="col-lg-3 col-md-4 mb-4">
-                    <div class="filter-sidebar" style="background:#fff; border:1px solid #eee; border-radius:12px; padding:24px; position:sticky; top:20px;">
+                    <% 
+                    let activeCount = 0;
+                    if (activeFilters) {
+                        if (activeFilters.ara) activeCount++;
+                        if (activeFilters.karat) activeCount++;
+                        if (activeFilters.renk) activeCount++;
+                        if (activeFilters.berraklik) activeCount++;
+                        if (activeFilters.kesim) activeCount++;
+                        if (activeFilters.metal) activeCount++;
+                        if (activeFilters.sertifika) activeCount++;
+                    }
+                    %>
+                    <!-- Mobile Filter Trigger Button -->
+                    <button type="button" id="mobileFilterBtn" class="btn-premium-filter-trigger">
+                        <i class="fas fa-sliders-h"></i> Filtrele <%= activeCount > 0 ? '(' + activeCount + ')' : '' %>
+                    </button>
+                    
+                    <!-- Mobile Filter Backdrop Drawer -->
+                    <div id="filterDrawerBackdrop" class="filter-drawer-backdrop"></div>
+                    
+                    <div class="premium-filter-sidebar">
+                        <!-- Drawer Header (visible on mobile only) -->
+                        <div class="filter-drawer-header">
+                            <h5 class="filter-header-title">🔍 Filtreler</h5>
+                            <button type="button" id="closeFilterBtn" class="filter-drawer-close-btn">&times;</button>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 style="font-weight:700; font-size:16px; color:#1a1a1a; margin:0;">🔍 Filtreler</h5>
-                            <a href="/shop" style="font-size:12px; color:#999;">Temizle</a>
+                            <h5 class="filter-header-title d-none d-lg-flex">🔍 Filtreler</h5>
+                            <a href="/shop" class="filter-clear-link">Temizle</a>
                         </div>
                         <form method="GET" action="/shop" id="filterForm">
                             <!-- Arama -->
-                            <div class="filter-group mb-4">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Ürün Ara</label>
-                                <div class="input-group">
-                                    <input type="text" name="ara" class="form-control form-control-sm" placeholder="İsim veya ürün kodu..." value="<%= activeFilters && activeFilters.ara ? activeFilters.ara : '' %>">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-sm btn-dark" type="submit"><i class="fas fa-search"></i></button>
-                                    </div>
+                            <div class="filter-group">
+                                <label class="filter-group-label">Ürün Ara</label>
+                                <div class="premium-search-wrapper">
+                                    <input type="text" name="ara" class="premium-search-input" placeholder="İsim veya ürün kodu..." value="<%= activeFilters && activeFilters.ara ? activeFilters.ara : '' %>">
+                                    <button class="premium-search-btn" type="submit"><i class="fas fa-search"></i></button>
                                 </div>
                             </div>
+                            
                             <!-- Karat Aralığı -->
-                            <div class="filter-group mb-4">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">💎 Karat Ağırlığı</label>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="karat" id="karatAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.karat ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="karatAll" style="font-size:13px;">Tümü</label>
-                                </div>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="karat" id="karatUnder" value="under0.5" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === 'under0.5' ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="karatUnder" style="font-size:13px;">0.50 ct altı</label>
-                                </div>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="karat" id="karatMid" value="0.5-1" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === '0.5-1' ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="karatMid" style="font-size:13px;">0.50 – 1.00 ct</label>
-                                </div>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="karat" id="karatPlus" value="1plus" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === '1plus' ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="karatPlus" style="font-size:13px;">1.00 ct ve üzeri</label>
+                            <div class="filter-group">
+                                <label class="filter-group-label">💎 Karat Ağırlığı</label>
+                                <div class="premium-radio-list">
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="karat" id="karatAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.karat ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>Tümü</span>
+                                    </label>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="karat" id="karatUnder" value="under0.5" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === 'under0.5' ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>0.50 ct altı</span>
+                                    </label>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="karat" id="karatMid" value="0.5-1" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === '0.5-1' ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>0.50 – 1.00 ct</span>
+                                    </label>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="karat" id="karatPlus" value="1plus" onchange="this.form.submit()" <%= activeFilters && activeFilters.karat === '1plus' ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>1.00 ct ve üzeri</span>
+                                    </label>
                                 </div>
                             </div>
+                            
                             <!-- Taş Rengi -->
-                            <div class="filter-group mb-4">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Taş Rengi</label>
-                                <% ['D','E','F','G','H'].forEach(r => { %>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="renk" id="renk<%= r %>" value="<%= r %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.renk === r ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="renk<%= r %>" style="font-size:13px;"><%= r %></label>
-                                </div>
-                                <% }); %>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="renk" id="renkAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.renk ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="renkAll" style="font-size:13px; color:#999;">Tümü</label>
+                            <div class="filter-group">
+                                <label class="filter-group-label">Taş Rengi</label>
+                                <div class="premium-tags-grid">
+                                    <label class="premium-tag-container">
+                                        <input type="radio" name="renk" id="renkAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.renk ? 'checked' : '' %>>
+                                        <span class="premium-tag-box">Tümü</span>
+                                    </label>
+                                    <% ['D','E','F','G','H'].forEach(r => { %>
+                                    <label class="premium-tag-container">
+                                        <input type="radio" name="renk" id="renk<%= r %>" value="<%= r %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.renk === r ? 'checked' : '' %>>
+                                        <span class="premium-tag-box"><%= r %></span>
+                                    </label>
+                                    <% }); %>
                                 </div>
                             </div>
+                            
                             <!-- Berraklık -->
-                            <div class="filter-group mb-4">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Berraklık</label>
-                                <% ['IF','VVS1','VVS2','VS1','VS2'].forEach(b => { %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="berraklik" id="berraklik<%= b %>" value="<%= b %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.berraklik === b ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="berraklik<%= b %>" style="font-size:13px;"><%= b %></label>
-                                </div>
-                                <% }); %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="berraklik" id="berraklikAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.berraklik ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="berraklikAll" style="font-size:13px; color:#999;">Tümü</label>
+                            <div class="filter-group">
+                                <label class="filter-group-label">Berraklık</label>
+                                <div class="premium-radio-list">
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="berraklik" id="berraklikAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.berraklik ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>Tümü</span>
+                                    </label>
+                                    <% ['IF','VVS1','VVS2','VS1','VS2'].forEach(b => { %>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="berraklik" id="berraklik<%= b %>" value="<%= b %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.berraklik === b ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span><%= b %></span>
+                                    </label>
+                                    <% }); %>
                                 </div>
                             </div>
+                            
                             <!-- Kesim -->
-                            <div class="filter-group mb-4">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Kesim / Şekil</label>
-                                <% ['Round','Marquise','Oval','Princess','Pear','Emerald','Cushion','Heart'].forEach(k => { %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="kesim" id="kesim<%= k %>" value="<%= k %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.kesim === k ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="kesim<%= k %>" style="font-size:13px;"><%= k %></label>
-                                </div>
-                                <% }); %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="kesim" id="kesimAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.kesim ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="kesimAll" style="font-size:13px; color:#999;">Tümü</label>
-                                </div>
-                            </div>
-                            <!-- Metal -->
-                            <div class="filter-group mb-4">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Maden</label>
-                                <% [['14k Altın','14k-altin'],['18k Altın','18k-altin'],['Gümüş','gumus'],['Platin','platin']].forEach(m => { %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="metal" id="metal<%= m[1] %>" value="<%= m[0] %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.metal === m[0] ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="metal<%= m[1] %>" style="font-size:13px;"><%= m[0] %></label>
-                                </div>
-                                <% }); %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="metal" id="metalAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.metal ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="metalAll" style="font-size:13px; color:#999;">Tümü</label>
+                            <div class="filter-group">
+                                <label class="filter-group-label">Kesim / Şekil</label>
+                                <div class="premium-radio-list">
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="kesim" id="kesimAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.kesim ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>Tümü</span>
+                                    </label>
+                                    <% ['Round','Marquise','Oval','Princess','Pear','Emerald','Cushion','Heart'].forEach(k => { %>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="kesim" id="kesim<%= k %>" value="<%= k %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.kesim === k ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span><%= k %></span>
+                                    </label>
+                                    <% }); %>
                                 </div>
                             </div>
+                            
+                            <!-- Maden -->
+                            <div class="filter-group">
+                                <label class="filter-group-label">Maden</label>
+                                <div class="premium-radio-list">
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="metal" id="metalAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.metal ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>Tümü</span>
+                                    </label>
+                                    <% [['14k Altın','14k-altin'],['18k Altın','18k-altin'],['Gümüş','gumus'],['Platin','platin']].forEach(m => { %>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="metal" id="metal<%= m[1] %>" value="<%= m[0] %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.metal === m[0] ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span><%= m[0] %></span>
+                                    </label>
+                                    <% }); %>
+                                </div>
+                            </div>
+                            
                             <!-- Sertifika -->
-                            <div class="filter-group mb-3">
-                                <label style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; display:block; margin-bottom:8px;">Sertifika</label>
-                                <% ['IGI','GIA','HRD'].forEach(s => { %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="sertifika" id="sertifika<%= s %>" value="<%= s %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.sertifika === s ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="sertifika<%= s %>" style="font-size:13px;"><%= s %></label>
-                                </div>
-                                <% }); %>
-                                <div class="form-check mb-1">
-                                    <input class="form-check-input" type="radio" name="sertifika" id="sertifikaAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.sertifika ? 'checked' : '' %>>
-                                    <label class="form-check-label" for="sertifikaAll" style="font-size:13px; color:#999;">Tümü</label>
+                            <div class="filter-group">
+                                <label class="filter-group-label">Sertifika</label>
+                                <div class="premium-radio-list">
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="sertifika" id="sertifikaAll" value="" onchange="this.form.submit()" <%= !activeFilters || !activeFilters.sertifika ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span>Tümü</span>
+                                    </label>
+                                    <% ['IGI','GIA','HRD'].forEach(s => { %>
+                                    <label class="premium-radio-container">
+                                        <input type="radio" name="sertifika" id="sertifika<%= s %>" value="<%= s %>" onchange="this.form.submit()" <%= activeFilters && activeFilters.sertifika === s ? 'checked' : '' %>>
+                                        <span class="premium-radio-checkmark"></span>
+                                        <span><%= s %></span>
+                                    </label>
+                                    <% }); %>
                                 </div>
                             </div>
                         </form>
@@ -164,8 +218,8 @@
                             width: 100%;
                             border-bottom: 2px solid #1a1a1a;
                             padding-bottom: 10px;
-                            margin-bottom: 30px;
-                            margin-top: 40px;
+                            margin-bottom: 15px;
+                            margin-top: 60px;
                             font-weight: 700;
                             font-family: 'Inter', sans-serif;
                             color: #1a1a1a;
@@ -311,6 +365,40 @@
         </div><!-- /container-fluid -->
     </section>
     <!-- Latest Products End -->
+    
+    <!-- Mobile Filter Drawer JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+        const closeFilterBtn = document.getElementById('closeFilterBtn');
+        const filterSidebar = document.querySelector('.premium-filter-sidebar');
+        const filterBackdrop = document.getElementById('filterDrawerBackdrop');
+
+        if (mobileFilterBtn && filterSidebar && filterBackdrop) {
+            mobileFilterBtn.addEventListener('click', function() {
+                filterSidebar.classList.add('active');
+                filterBackdrop.classList.add('active');
+                document.body.style.overflow = 'hidden'; // prevent background scrolling
+            });
+        }
+
+        function closeDrawer() {
+            if (filterSidebar && filterBackdrop) {
+                filterSidebar.classList.remove('active');
+                filterBackdrop.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        if (closeFilterBtn) {
+            closeFilterBtn.addEventListener('click', closeDrawer);
+        }
+
+        if (filterBackdrop) {
+            filterBackdrop.addEventListener('click', closeDrawer);
+        }
+    });
+    </script>
 </main>
 
 <%- include('partials/footer') %>

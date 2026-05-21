@@ -27,7 +27,7 @@ const homeSettingSchema = new mongoose.Schema({
     },
     service3Desc: { 
         type: String, 
-        default: 'Kapalıçarşı mağazamızı ziyaret edebilirsiniz' 
+        default: 'Kuyumcukent mağazamızı ziyaret edebilirsiniz' 
     },
     service4Title: { 
         type: String, 
