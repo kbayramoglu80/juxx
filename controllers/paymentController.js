@@ -3,7 +3,7 @@ const Order = require('../models/Order');
 
 exports.createPaymentToken = async (req, res) => {
     try {
-        const { user_name, user_address, user_phone } = req.body;
+        const { user_name, user_address, user_phone, user_email } = req.body;
         
         // Cart check
         if (!req.session.cart || req.session.cart.length === 0) {
@@ -32,7 +32,7 @@ exports.createPaymentToken = async (req, res) => {
         const no_installment = 0;
         const max_installment = 0;
         const user_ip = req.ip || '127.0.0.1';
-        const email = req.session.user ? req.session.user.email : 'test@test.com'; // Fallback if needed
+        const email = req.session.user ? req.session.user.email : (user_email || 'guest@test.com');
         
         const currency = "TL";
 
@@ -43,6 +43,9 @@ exports.createPaymentToken = async (req, res) => {
         // Siparişi veritabanına "Pending" olarak kaydet
         const newOrder = new Order({
             user: req.session.user ? (req.session.user._id || req.session.user.id) : null,
+            guestName: !req.session.user ? user_name : undefined,
+            guestEmail: !req.session.user ? email : undefined,
+            guestPhone: !req.session.user ? user_phone : undefined,
             items: req.session.cart.map(item => ({ 
                 product: item.productId, 
                 quantity: item.quantity, 

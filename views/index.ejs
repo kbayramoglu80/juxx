@@ -27,6 +27,10 @@
                 min-height: 660px !important; /* Mobil boyutu büyütüldü */
             }
 
+            .slider-area .single-slider.hero-overly {
+                background-image: url('/assets/img/hero/whatsapp_hero_mobile.jpeg') !important;
+            }
+
             .slider-area .hero__caption {
                 padding: 0 12px;
             }
@@ -67,7 +71,10 @@
                 <% } else { %>
                     <!-- Fallback if no banners -->
                     <div style="cursor: pointer; width: 100%; line-height: 0;" onclick="window.location.href='/shop'">
-                        <img src="/assets/img/hero/slider_1.png" alt="Açılışa Özel Kampanya" style="width: 100%; height: auto; display: block;">
+                        <picture>
+                            <source media="(max-width: 767px)" srcset="/assets/img/hero/whatsapp_hero_mobile.jpeg">
+                            <img src="/assets/img/hero/slider_1.png" alt="Açılışa Özel Kampanya" style="width: 100%; height: auto; display: block;">
+                        </picture>
                     </div>
                 <% } %>
             </div>

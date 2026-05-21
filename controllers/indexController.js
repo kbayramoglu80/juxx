@@ -225,11 +225,6 @@ exports.removeFromCart = (req, res) => {
 
 // Checkout Methods
 exports.getCheckout = (req, res) => {
-    // Only allow checkout if user is logged in
-    if (!req.session.user) {
-        return res.redirect('/auth/login?redirect=/checkout');
-    }
-    
     // Check if cart is empty
     if (!req.session.cart || req.session.cart.length === 0) {
         return res.redirect('/cart');

@@ -96,7 +96,7 @@
                             <% recentOrders.forEach(order => { %>
                                 <tr>
                                     <td>#<%= order._id.toString().substring(0,8) %></td>
-                                    <td><%= order.user ? order.user.name : 'Misafir' %></td>
+                                    <td><%= order.user ? order.user.name : (order.guestName || 'Misafir') %></td>
                                     <td>₺<%= order.totalAmount %></td>
                                     <td><span class="badge badge-info"><%= order.orderStatus %></span></td>
                                     <td><%= order.createdAt.toLocaleDateString('tr-TR') %></td>
