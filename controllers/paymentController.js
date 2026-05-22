@@ -111,10 +111,11 @@ exports.paymentCallback = async (req, res) => {
         console.log('=== PAYTR WEBHOOK START ===');
         console.log('Method:', req.method);
         console.log('Headers:', JSON.stringify(req.headers, null, 2));
-        console.log('Body:', JSON.stringify(req.body, null, 2));
+        console.log('Body:', JSON.stringify(req.body || {}, null, 2));
 
+        const body = req.body || {};
         // PayTR'den gelen POST verisi
-        const { merchant_oid, status, total_amount, hash } = req.body;
+        const { merchant_oid, status, total_amount, hash } = body;
         
         if (!merchant_oid || !status || !total_amount || !hash) {
             console.error('PayTR Webhook Error: Missing required fields in request body.');
@@ -124,6 +125,15 @@ exports.paymentCallback = async (req, res) => {
         
         const merchant_key = process.env.PAYTR_MERCHANT_KEY;
         const merchant_salt = process.env.PAYTR_MERCHANT_SALT;
+        
+        console.log('Env merchant_key loaded:', merchant_key ? `Yes (Length: ${merchant_key.length}, Start: ${merchant_key.substring(0, 3)}...)` : 'No');
+        console.log('Env merchant_salt loaded:', merchant_salt ? `Yes (Length: ${merchant_salt.length}, Start: ${merchant_salt.substring(0, 3)}...)` : 'No');
+        
+        if (!merchant_key || !merchant_salt) {
+            console.error('PayTR Webhook Error: PAYTR_MERCHANT_KEY or PAYTR_MERCHANT_SALT is not defined in environment variables.');
+            console.log('=== PAYTR WEBHOOK END (CONFIG ERROR) ===');
+            return res.status(500).send('ERROR: Missing environment configuration');
+        }
         
         // Hash kontrolü
         const hash_str = merchant_oid + merchant_salt + status + total_amount;
