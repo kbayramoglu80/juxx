@@ -45,7 +45,7 @@ exports.getHome = async (req, res) => {
 
 exports.getShop = async (req, res) => {
     try {
-        const { category, karat, renk, berraklik, kesim, metal, sertifika, ara } = req.query;
+        const { category, karat, renk, berraklik, kesim, metal, sertifika, ara, q } = req.query;
         let query = {};
         let pageTitle = 'Mağaza';
         
@@ -61,8 +61,9 @@ exports.getShop = async (req, res) => {
         }
 
         // Arama (isim veya ürün kodu)
-        if (ara && ara.trim() !== '') {
-            const searchRegex = new RegExp(ara.trim(), 'i');
+        const araVal = (ara || q || '').trim();
+        if (araVal !== '') {
+            const searchRegex = new RegExp(araVal, 'i');
             query.$or = [
                 { name: searchRegex },
                 { productCode: searchRegex }
@@ -96,7 +97,7 @@ exports.getShop = async (req, res) => {
             products, categories, 
             currentCategory: category || 'Hepsi', 
             pageTitle,
-            activeFilters: { karat, renk, berraklik, kesim, metal, sertifika, ara }
+            activeFilters: { karat, renk, berraklik, kesim, metal, sertifika, ara: araVal }
         });
     } catch (err) {
         console.error(err);

@@ -93,9 +93,165 @@
         </div>
     </div>
     <!-- End Hero -->
-    
+
+<!--? Services Area Start -->
+<div class="categories-area gray-bg" style="padding: 35px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+    <div class="container">
+        <style>
+            .services-old-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0;
+                text-align: center;
+            }
+            .service-old-item {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                padding: 20px 15px;
+                border-right: 1px solid rgba(0,0,0,0.07);
+            }
+            .service-old-item:last-child {
+                border-right: none;
+            }
+            .service-old-icon {
+                margin-right: 14px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.3s ease;
+            }
+            .service-old-item:hover .service-old-icon {
+                transform: translateY(-3px);
+            }
+            .service-old-icon svg {
+                width: 36px;
+                height: 36px;
+            }
+            .service-old-text {
+                text-align: left;
+            }
+            .service-old-title {
+                font-family: 'Montserrat', sans-serif !important;
+                font-size: 13px;
+                font-weight: 600;
+                color: #1a1a1a;
+                line-height: 1.3;
+                margin: 0 0 3px 0;
+            }
+            .service-old-desc {
+                font-family: 'Montserrat', sans-serif !important;
+                font-size: 11px;
+                font-weight: 400;
+                color: #777;
+                line-height: 1.4;
+                margin: 0;
+            }
+            @media (max-width: 991px) {
+                .services-old-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .service-old-item {
+                    border-right: 1px solid rgba(0,0,0,0.07);
+                    border-bottom: 1px solid rgba(0,0,0,0.07);
+                }
+                .service-old-item:nth-child(2n) {
+                    border-right: none;
+                }
+                .service-old-item:nth-last-child(-n+2) {
+                    border-bottom: none;
+                }
+            }
+            @media (max-width: 575px) {
+                .services-old-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+                .service-old-item {
+                    padding: 16px 10px;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .service-old-icon {
+                    margin-right: 0;
+                    margin-bottom: 8px;
+                }
+                .service-old-text {
+                    text-align: center;
+                }
+                .service-old-title {
+                    font-size: 11px;
+                }
+                .service-old-desc {
+                    font-size: 10px;
+                }
+            }
+        </style>
+        <div class="services-old-grid">
+            <!-- Item 1: Sigortalı Teslimat -->
+            <div class="service-old-item wow fadeInUp" data-wow-duration="1s" data-wow-delay=".1s">
+                <div class="service-old-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13" rx="2" ry="2"/>
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                </div>
+                <div class="service-old-text">
+                    <h5 class="service-old-title">Sigortalı Teslimat</h5>
+                    <p class="service-old-desc">Güvenli ve hızlı kargo</p>
+                </div>
+            </div>
+
+            <!-- Item 2: Güvenli Ödeme -->
+            <div class="service-old-item wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                <div class="service-old-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                </div>
+                <div class="service-old-text">
+                    <h5 class="service-old-title">Güvenli Ödeme</h5>
+                    <p class="service-old-desc">256-bit SSL şifreleme</p>
+                </div>
+            </div>
+
+            <!-- Item 3: Kolay İade -->
+            <div class="service-old-item wow fadeInUp" data-wow-duration="1s" data-wow-delay=".3s">
+                <div class="service-old-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                </div>
+                <div class="service-old-text">
+                    <h5 class="service-old-title">Kolay İade</h5>
+                    <p class="service-old-desc">14 gün iade garantisi</p>
+                </div>
+            </div>
+
+            <!-- Item 4: Uzman Destek -->
+            <div class="service-old-item wow fadeInUp" data-wow-duration="1s" data-wow-delay=".4s">
+                <div class="service-old-icon">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.4 2 2 0 0 1 3.57 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7a2 2 0 0 1 1.72 2.03z"/>
+                    </svg>
+                </div>
+                <div class="service-old-text">
+                    <h5 class="service-old-title">Uzman Destek</h5>
+                    <p class="service-old-desc">7/24 müşteri hizmetleri</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--? Services Area End -->
+
 <!--? New Arrival Start -->
-<div class="new-arrival hero-adjacent-section">
+<div class="new-arrival">
     <div class="container">
         <!-- Section title & Sorting Dropdown -->
         <div class="row justify-content-center mb-40">
@@ -215,176 +371,6 @@
 <% } %>
 <!--? Dinamik Özel Reyonlar Bitişi -->
 
-    <!--? Popular Items Start -->
-    <div class="popular-items pt-50">
-        <div class="container-fluid">
-            <style>
-                .col-fifth {
-                    position: relative;
-                    width: 100%;
-                    padding-right: 15px;
-                    padding-left: 15px;
-                }
-                @media (min-width: 992px) {
-                    .col-fifth {
-                        flex: 0 0 20%;
-                        max-width: 20%;
-                    }
-                   <div class="row justify-content-center">
-                <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                    <% categories.slice(0, 5).forEach((cat, index) => { 
-                        let imgUrl = `/assets/img/gallery/popular${(index % 5) + 1}.png`;
-                    %>
-                        <div class="col-fifth col-md-4 col-sm-6">
-                            <div class="single-popular-items mb-50 text-center wow fadeInUp" data-wow-duration="1s" data-wow-delay="<%= 0.1 * (index + 1) %>s">
-                                <div class="popular-img">
-                                    <img src="<%= imgUrl %>" alt="<%= cat.name %>" onerror="this.src='/assets/img/gallery/popular1.png'">
-                                    <div class="img-cap">
-                                        <span><%= cat.name %></span>
-                                    </div>
-                                    <div class="favorit-items">
-                                        <a href="/shop?category=<%= cat.slug %>" class="btn">İncele</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% }); %>
-                <% } else { %>
-                    <div class="col-fifth col-md-4 col-sm-6">
-                        <div class="single-popular-items mb-50 text-center">
-                            <div class="popular-img">
-                                <img src="/assets/img/gallery/popular1.png" alt="">
-                                <div class="img-cap"><span>Pırlanta Yüzükler</span></div>
-                                <div class="favorit-items"><a href="/shop?category=yuzukler" class="btn">İncele</a></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-fifth col-md-4 col-sm-6">
-                        <div class="single-popular-items mb-50 text-center">
-                            <div class="popular-img">
-                                <img src="/assets/img/gallery/popular2.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
-                                <div class="img-cap"><span>Pırlanta Kolyeler</span></div>
-                                <div class="favorit-items"><a href="/shop?category=kolyeler" class="btn">İncele</a></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-fifth col-md-4 col-sm-6">
-                        <div class="single-popular-items mb-50 text-center">
-                            <div class="popular-img">
-                                <img src="/assets/img/gallery/popular3.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
-                                <div class="img-cap"><span>Pırlanta Küpeler</span></div>
-                                <div class="favorit-items"><a href="/shop?category=kupeler" class="btn">İncele</a></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-fifth col-md-4 col-sm-6">
-                        <div class="single-popular-items mb-50 text-center">
-                            <div class="popular-img">
-                                <img src="/assets/img/gallery/popular4.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
-                                <div class="img-cap"><span>Pırlanta Bileklikler</span></div>
-                                <div class="favorit-items"><a href="/shop?category=bileklikler" class="btn">İncele</a></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-fifth col-md-4 col-sm-6">
-                        <div class="single-popular-items mb-50 text-center">
-                            <div class="popular-img">
-                                <img src="/assets/img/gallery/popular5.png" alt="" onerror="this.src='/assets/img/gallery/popular1.png'">
-                                <div class="img-cap"><span>Alyanslar</span></div>
-                                <div class="favorit-items"><a href="/shop?category=alyanslar" class="btn">İncele</a></div>
-                            </div>
-                        </div>
-                    </div>
-                <% } %>
-            </div>
-        </div>
-    </div>
-    <!-- Popular Items End -->
-
-<!--? collection -->
-<% if (typeof middleBanners !== 'undefined' && middleBanners.length > 0) { %>
-    <% middleBanners.forEach(banner => { %>
-        <section class="collection section-bg2 section-padding30 section-over1 ml-15 mr-15" style="background-image: url('<%= banner.imageUrl %>'); background-size: cover; background-position: center;">
-            <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-xl-7 col-lg-9">
-                        <div class="single-question text-center">
-                            <h2 class="wow fadeInUp" data-wow-duration="2s" data-wow-delay=".1s"><%= banner.title %></h2>
-                            <a href="<%= banner.link %>" class="btn wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s"><%= banner.subtitle || 'Keşfet' %></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    <% }); %>
-<% } else { %>
-    <section class="collection section-bg2 section-padding30 section-over1 ml-15 mr-15" data-background="/assets/img/gallery/section_bg01.png">
-        <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="col-xl-7 col-lg-9">
-                    <div class="single-question text-center">
-                        <h2 class="wow fadeInUp" data-wow-duration="2s" data-wow-delay=".1s">Eşsiz Koleksiyonlarımızla Tanışın</h2>
-                        <a href="/about" class="btn wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s">Hakkımızda</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-<% } %>
-<!-- End collection -->
-
-<!--? Services Area Start -->
-<div class="categories-area section-padding40 gray-bg">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="single-cat mb-50 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
-                    <div class="cat-icon">
-                        <img src="/assets/img/icon/services1.svg" alt="">
-                    </div>
-                    <div class="cat-cap">
-                        <h5><%= typeof setting !== 'undefined' ? (setting.service1Title || 'Hızlı ve Ücretsiz Teslimat') : 'Hızlı ve Ücretsiz Teslimat' %></h5>
-                        <p><%= typeof setting !== 'undefined' ? (setting.service1Desc || 'Tüm siparişlerde ücretsiz kargo') : 'Tüm siparişlerde ücretsiz kargo' %></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="single-cat mb-50 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
-                    <div class="cat-icon">
-                        <img src="/assets/img/icon/services2.svg" alt="">
-                    </div>
-                    <div class="cat-cap">
-                        <h5><%= typeof setting !== 'undefined' ? (setting.service2Title || 'Güvenli Ödeme') : 'Güvenli Ödeme' %></h5>
-                        <p><%= typeof setting !== 'undefined' ? (setting.service2Desc || 'PayTR ile %100 güvenli ödeme') : 'PayTR ile %100 güvenli ödeme' %></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="single-cat mb-30 wow fadeInUp" data-wow-duration="1s" data-wow-delay=".4s">
-                    <div class="cat-icon">
-                        <img src="/assets/img/icon/services3.svg" alt="">
-                    </div>
-                    <div class="cat-cap">
-                        <h5><%= typeof setting !== 'undefined' ? (setting.service3Title || 'Mağazamızı Ziyaret Edin') : 'Mağazamızı Ziyaret Edin' %></h5>
-                        <p><%= typeof setting !== 'undefined' ? (setting.service3Desc || 'Kuyumcukent mağazamızı ziyaret edebilirsiniz') : 'Kuyumcukent mağazamızı ziyaret edebilirsiniz' %></p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="single-cat wow fadeInUp" data-wow-duration="1s" data-wow-delay=".5s">
-                    <div class="cat-icon">
-                        <img src="/assets/img/icon/services4.svg" alt="">
-                    </div>
-                    <div class="cat-cap">
-                        <h5><%= typeof setting !== 'undefined' ? (setting.service4Title || 'Uzman Kadro Desteği') : 'Uzman Kadro Desteği' %></h5>
-                        <p><%= typeof setting !== 'undefined' ? (setting.service4Desc || 'Uzman kadromuzla 7/24 destek vermeye hazırız') : 'Uzman kadromuzla 7/24 destek vermeye hazırız' %></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!--? Services Area End -->
 <style>
 /* Custom CSS styling for premium sort dropdown and hidden items */
 .premium-card-hidden {
