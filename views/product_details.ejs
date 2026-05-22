@@ -180,7 +180,7 @@
                         <!-- Main Image / Video Area -->
                         <div class="pdp-main-image" id="main-image-container" onmousemove="zoomImage(event)" onmouseleave="resetZoom()">
                             <img src="<%= product.imageUrl %>" id="main-product-image" alt="<%= product.name %>" ondblclick="openLargePhoto(this.src)" ontouchstart="handleImageTap(event, this.src)">
-                            <video id="main-product-video" controls style="display:none; width: 100%; max-height: 600px; object-fit: contain;"></video>
+                            <video id="main-product-video" controls playsinline webkit-playsinline preload="metadata" style="display:none; width: 100%; height: auto; max-height: 600px; object-fit: contain;"></video>
                             
                             <!-- Slider Nav Buttons -->
                             <button class="slider-btn prev-btn" onclick="prevImage()"><i class="fas fa-chevron-left"></i></button>
@@ -537,8 +537,21 @@ function changeMedia(element, src, type) {
     if (type === 'video') {
         imgEl.style.display = 'none';
         vidEl.style.display = 'block';
-        vidEl.src = src;
-        vidEl.play();
+        if (vidEl.src !== src) {
+            vidEl.src = src;
+        }
+        
+        // Ensure inline rendering properties are set programmatically for all mobile OS
+        vidEl.setAttribute('playsinline', '');
+        vidEl.setAttribute('webkit-playsinline', '');
+        
+        // Attempt to play the video with error catching for mobile gesture restrictions
+        const playPromise = vidEl.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("Video auto-play was prevented by the mobile browser. User can trigger manually.", error);
+            });
+        }
         resetZoom(); // Reset zoom if video active
     } else {
         vidEl.pause();

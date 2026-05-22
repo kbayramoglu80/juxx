@@ -93,7 +93,7 @@
                                     <td><img src="<%= product.imageUrl %>" width="50" alt=""></td>
                                     <td><%= product.name %></td>
                                     <td><%= product.category ? product.category.name : 'Kategorisiz' %></td>
-                                    <td>₺<%= product.price %></td>
+                                    <td>₺<%= product.price.toLocaleString('tr-TR') %></td>
                                     <td><%= product.stock %></td>
                                     <td>
                                         <button class="btn btn-sm btn-warning mr-2" data-toggle="modal" data-target="#editProductModal" onclick='populateEditProduct(<%- JSON.stringify(product).replace(/'/g, "\\'") %>)'><i class="fas fa-edit"></i></button>

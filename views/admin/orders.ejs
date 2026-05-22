@@ -170,14 +170,14 @@
                                                             </td>
                                                             <td style="vertical-align: middle;"><%= item.selectedCarat ? item.selectedCarat + ' ct' : '-' %></td>
                                                             <td style="vertical-align: middle;"><%= item.selectedSize ? item.selectedSize : '-' %></td>
-                                                            <td style="vertical-align: middle;">₺<%= item.price %></td>
+                                                            <td style="vertical-align: middle;">₺<%= item.price.toLocaleString('tr-TR') %></td>
                                                             <td style="vertical-align: middle;"><%= item.quantity %></td>
-                                                            <td style="vertical-align: middle;" class="font-weight-bold text-right">₺<%= item.price * item.quantity %></td>
+                                                            <td style="vertical-align: middle;" class="font-weight-bold text-right">₺<%= (item.price * item.quantity).toLocaleString('tr-TR') %></td>
                                                         </tr>
                                                     <% }); %>
                                                     <tr class="table-info font-weight-bold">
                                                         <td colspan="6" class="text-right">GENEL TOPLAM:</td>
-                                                        <td class="text-right text-dark" style="font-size: 1.1em;">₺<%= order.totalAmount %></td>
+                                                        <td class="text-right text-dark" style="font-size: 1.1em;">₺<%= order.totalAmount.toLocaleString('tr-TR') %></td>
                                                     </tr>
                                                 </tbody>
                                             </table>

@@ -661,6 +661,14 @@ body {
     pointer-events: none;
 }
 
+.pdp-main-image video {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: contain;
+    background: #000000;
+}
+
 /* Simplified Modern Typography Overrides */
 h1, h2, h3, h4, h5, h6,
 .section-tittle h2,

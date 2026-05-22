@@ -37,7 +37,7 @@
                                                 <span class="badge badge-info ml-2" style="font-size: 0.8rem; background: #d0e0e8; color: #55738a; border-radius: 50px; padding: 4px 10px; font-weight: bold;">Ölçü: <%= item.selectedSize %></span>
                                             <% } %>
                                         </h4>
-                                        <p class="mb-2" style="color: #888; font-size: 0.95rem;">Birim Fiyat: ₺ <%= item.price %></p>
+                                        <p class="mb-2" style="color: #888; font-size: 0.95rem;">Birim Fiyat: ₺ <%= item.price.toLocaleString('tr-TR') %></p>
                                         <div class="d-flex align-items-center justify-content-between mt-3">
                                             <div class="item-qty" style="background: #f8f8f8; padding: 6px 20px; border-radius: 50px; font-weight: 700; color: #555;">
                                                 Adet: <%= item.quantity %>

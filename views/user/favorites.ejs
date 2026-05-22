@@ -39,7 +39,7 @@
                                     <%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %>
                                 </div>
                                 <div class="premium-card-price-wrap">
-                                    <span class="premium-card-price">₺ <%= product.price %></span>
+                                    <span class="premium-card-price">₺ <%= product.price.toLocaleString('tr-TR') %></span>
                                 </div>
                                 <div class="card-actions">
                                     <a href="/product/<%= product._id %>" class="btn-premium-secondary" style="padding: 10px; font-size: 10px;">İncele</a>
