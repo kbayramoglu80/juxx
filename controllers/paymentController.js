@@ -23,9 +23,11 @@ exports.createPaymentToken = async (req, res) => {
         
         const merchant_oid = 'OID' + Date.now(); // Benzersiz sipariş numarası
         const payment_amount = Math.round(cartTotal * 100); // Kuruş cinsinden
-        const merchant_ok_url = 'http://localhost:3000/payment/success';
-        const merchant_fail_url = 'http://localhost:3000/payment/fail';
-        const user_basket = JSON.stringify(cart_items);
+        const host = req.get('host');
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const merchant_ok_url = `${protocol}://${host}/payment/success`;
+        const merchant_fail_url = `${protocol}://${host}/payment/fail`;
+        const user_basket = Buffer.from(JSON.stringify(cart_items)).toString('base64');
         const timeout_limit = "30";
         const debug_on = 1;
         const test_mode = 1; // 1 for testing, 0 for production
@@ -106,8 +108,19 @@ exports.createPaymentToken = async (req, res) => {
 
 exports.paymentCallback = async (req, res) => {
     try {
+        console.log('=== PAYTR WEBHOOK START ===');
+        console.log('Method:', req.method);
+        console.log('Headers:', JSON.stringify(req.headers, null, 2));
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+
         // PayTR'den gelen POST verisi
         const { merchant_oid, status, total_amount, hash } = req.body;
+        
+        if (!merchant_oid || !status || !total_amount || !hash) {
+            console.error('PayTR Webhook Error: Missing required fields in request body.');
+            console.log('=== PAYTR WEBHOOK END (FAILED) ===');
+            return res.status(400).send('FAIL: Missing fields');
+        }
         
         const merchant_key = process.env.PAYTR_MERCHANT_KEY;
         const merchant_salt = process.env.PAYTR_MERCHANT_SALT;
@@ -116,22 +129,30 @@ exports.paymentCallback = async (req, res) => {
         const hash_str = merchant_oid + merchant_salt + status + total_amount;
         const calculated_hash = crypto.createHmac('sha256', merchant_key).update(hash_str).digest('base64');
         
+        console.log('Received Hash:', hash);
+        console.log('Calculated Hash:', calculated_hash);
+        
         if (hash !== calculated_hash) {
             console.error('PayTR Webhook Hash Mismatch!');
+            console.log('=== PAYTR WEBHOOK END (HASH MISMATCH) ===');
             return res.send('PAYTR WATCH DOG HASH FAILED');
         }
         
-        if (status === 'success') {
-            await Order.findOneAndUpdate({ merchant_oid }, { paymentStatus: 'Paid' });
-            console.log(`Order ${merchant_oid} paid successfully`);
+        const order = await Order.findOne({ merchant_oid });
+        
+        if (!order) {
+            console.warn(`PayTR Webhook Warning: Order with merchant_oid ${merchant_oid} was not found in the database!`);
         } else {
-            await Order.findOneAndUpdate({ merchant_oid }, { paymentStatus: 'Failed' });
-            console.log(`Order ${merchant_oid} payment failed`);
+            order.paymentStatus = status === 'success' ? 'Paid' : 'Failed';
+            await order.save();
+            console.log(`PayTR Webhook Success: Order ${merchant_oid} status updated to: ${order.paymentStatus}`);
         }
         
+        console.log('=== PAYTR WEBHOOK END (OK) ===');
         res.send('OK');
     } catch (error) {
         console.error('PayTR Webhook Error:', error);
+        console.log('=== PAYTR WEBHOOK END (ERROR) ===');
         res.status(500).send('ERROR');
     }
 };
@@ -146,4 +167,14 @@ exports.paymentSuccess = (req, res) => {
 
 exports.paymentFail = (req, res) => {
     res.render('payment_fail');
+};
+
+exports.paymentCallbackGet = (req, res) => {
+    console.error('PayTR Webhook GET Error: Received GET request instead of POST!');
+    res.status(405).send(
+        'HATA: Sunucunuza POST yerine GET isteği ulaştı! ' +
+        'Bu durum, sitenizde etkin olan otomatik bir yönlendirmeden (HTTP -> HTTPS veya www. -> non-www) kaynaklanır. ' +
+        'PayTR bildirimleri sadece POST isteği ile gönderir, ancak yönlendirmeler tarayıcı/istemci tarafından POST isteğini GET isteğine dönüştürür ve veri kaybına yol açar. ' +
+        'Lütfen PayTR Mağaza Paneli -> Ayarlar bölümündeki Bildirim URL bilgisini yönlendirme yapmayan nihai URL (örneğin doğrudan https://midiamond.com.tr/payment/callback) olarak güncelleyin veya sunucunuzun yönlendirme ayarlarını kontrol edin.'
+    );
 };
