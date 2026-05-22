@@ -480,11 +480,13 @@ exports.getHomeSettings = async (req, res) => {
 
         const sections = await HomeSection.find().populate('products').sort({ order: 1 });
         const products = await Product.find().sort({ name: 1 });
+        const categories = await Category.find().sort({ order: 1, name: 1 });
 
         res.render('admin/home_settings', { 
             setting, 
             sections, 
-            products 
+            products,
+            categories
         });
     } catch (err) {
         console.error(err);
@@ -499,7 +501,12 @@ exports.updateHomeSettings = async (req, res) => {
             service1Title, service1Desc,
             service2Title, service2Desc,
             service3Title, service3Desc,
-            service4Title, service4Desc
+            service4Title, service4Desc,
+            promoNav1Label, promoNav1Category,
+            promoNav2Label, promoNav2Category,
+            promoNav3Label, promoNav3Category,
+            promoNav4Label, promoNav4Category,
+            promoNav5Label, promoNav5Category
         } = req.body;
 
         let setting = await HomeSetting.findOne();
@@ -516,6 +523,16 @@ exports.updateHomeSettings = async (req, res) => {
         setting.service3Desc = service3Desc;
         setting.service4Title = service4Title;
         setting.service4Desc = service4Desc;
+        setting.promoNav1Label    = promoNav1Label || '';
+        setting.promoNav1Category = promoNav1Category || '';
+        setting.promoNav2Label    = promoNav2Label || '';
+        setting.promoNav2Category = promoNav2Category || '';
+        setting.promoNav3Label    = promoNav3Label || '';
+        setting.promoNav3Category = promoNav3Category || '';
+        setting.promoNav4Label    = promoNav4Label || '';
+        setting.promoNav4Category = promoNav4Category || '';
+        setting.promoNav5Label    = promoNav5Label || '';
+        setting.promoNav5Category = promoNav5Category || '';
 
         await setting.save();
         res.redirect('/admin/home-settings?msg=success');

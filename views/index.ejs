@@ -294,9 +294,9 @@
                             <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
                             <div class="premium-card-desc"><%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %></div>
                             <div class="premium-card-price-wrap">
-                                <span class="premium-card-price">₺ <%= product.price %></span>
+                                <span class="premium-card-price">₺ <%= product.price.toLocaleString('tr-TR') %></span>
                                 <% if (product.price > 1000) { %>
-                                    <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                    <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2).toLocaleString('tr-TR') %></span>
                                 <% } %>
                             </div>
                             <div class="card-actions">
@@ -351,9 +351,9 @@
                                 <div class="premium-card-title"><a href="/product/<%= product._id %>"><%= product.name %></a></div>
                                 <div class="premium-card-desc"><%= product.description ? product.description.substring(0,30) + '...' : 'Pırlanta Şıklığı' %></div>
                                 <div class="premium-card-price-wrap">
-                                    <span class="premium-card-price">₺ <%= product.price %></span>
+                                    <span class="premium-card-price">₺ <%= product.price.toLocaleString('tr-TR') %></span>
                                     <% if (product.price > 1000) { %>
-                                        <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2) %></span>
+                                        <span class="premium-card-old-price">₺ <%= Math.round(product.price * 1.2).toLocaleString('tr-TR') %></span>
                                     <% } %>
                                 </div>
                                 <div class="card-actions">

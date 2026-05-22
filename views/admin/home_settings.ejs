@@ -59,6 +59,9 @@
                     <a class="nav-link active" id="headings-tab" data-toggle="tab" href="#headings" role="tab"><i class="fas fa-heading mr-2"></i> Genel Başlıklar & Hizmetler</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" id="promo-tab" data-toggle="tab" href="#promo" role="tab"><i class="fas fa-tags mr-2"></i> Promo Menü (Üst Bar)</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" id="sections-tab" data-toggle="tab" href="#sections" role="tab"><i class="fas fa-layer-group mr-2"></i> Özel Reyonlar (Dinamik Bölümler)</a>
                 </li>
             </ul>
@@ -134,13 +137,43 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="text-right mt-4">
-                                <button type="submit" class="btn btn-warning px-5 py-2 font-weight-bold"><i class="fas fa-save mr-2"></i> Değişiklikleri Kaydet</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Promo Navigation Tab -->
+                    <div class="tab-pane fade" id="promo" role="tabpanel">
+                        <div class="card p-4">
+                            <h4 class="mb-3 gold-text pb-2 border-bottom"><i class="fas fa-tags mr-2"></i> Üst Menü Promo Linkleri</h4>
+                            <p class="text-muted mb-4">Sitenin üst kısmında (header altında) görüntülenen promosyon menü öğelerini yönetin. Başlığı boş bırakırsanız o öğe gizlenir.</p>
+                            <div class="row">
+                                <% for (let i = 1; i <= 5; i++) { %>
+                                <div class="col-md-6 mb-3">
+                                    <div class="p-3 border rounded bg-light">
+                                        <h5 class="font-weight-bold text-dark mb-3"><i class="fas fa-link mr-2"></i> Menü Öğesi <%= i %></h5>
+                                        <div class="form-group">
+                                            <label>Başlık</label>
+                                            <input type="text" name="promoNav<%= i %>Label" class="form-control" value="<%= setting['promoNav' + i + 'Label'] || '' %>" placeholder="Örn: Yeni Sezon">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Bağlantı (Kategori)</label>
+                                            <select name="promoNav<%= i %>Category" class="form-control">
+                                                <option value="">-- Kategori Seç -- (Shop Sayfası)</option>
+                                                <% categories.forEach(cat => { %>
+                                                <option value="<%= cat.slug %>" <%= setting['promoNav' + i + 'Category'] === cat.slug ? 'selected' : '' %>><%= cat.name %></option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right mt-4">
+                        <button type="submit" class="btn btn-warning px-5 py-2 font-weight-bold"><i class="fas fa-save mr-2"></i> Değişiklikleri Kaydet</button>
+                    </div>
+                </form>
 
                 <!-- Custom Sections Tab -->
                 <div class="tab-pane fade" id="sections" role="tabpanel">

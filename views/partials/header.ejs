@@ -375,11 +375,29 @@
     <div class="header-bottom d-none d-lg-block">
         <div class="container-fluid">
             <ul class="header-promo-nav">
-                <li><a href="#">Pırlanta Fırsatları Net %50 İndirim</a></li>
-                <li><a href="#" class="text-dark">Çok Satanlar</a></li>
-                <li><a href="#" class="text-dark">Hızlı Kargo</a></li>
-                <li><a href="#" class="text-dark">Hediye Önerileri</a></li>
-                <li><a href="#" class="text-dark">Online Özel</a></li>
+                <% const promoSetting = typeof globalSetting !== 'undefined' ? globalSetting : {}; %>
+                <% if (promoSetting.promoNav1Label) { %>
+                <li><a href="<%= promoSetting.promoNav1Category ? '/shop?category=' + promoSetting.promoNav1Category : '/shop' %>"><%= promoSetting.promoNav1Label %></a></li>
+                <% } %>
+                <% if (promoSetting.promoNav2Label) { %>
+                <li><a href="<%= promoSetting.promoNav2Category ? '/shop?category=' + promoSetting.promoNav2Category : '/shop' %>" class="text-dark"><%= promoSetting.promoNav2Label %></a></li>
+                <% } %>
+                <% if (promoSetting.promoNav3Label) { %>
+                <li><a href="<%= promoSetting.promoNav3Category ? '/shop?category=' + promoSetting.promoNav3Category : '/shop' %>" class="text-dark"><%= promoSetting.promoNav3Label %></a></li>
+                <% } %>
+                <% if (promoSetting.promoNav4Label) { %>
+                <li><a href="<%= promoSetting.promoNav4Category ? '/shop?category=' + promoSetting.promoNav4Category : '/shop' %>" class="text-dark"><%= promoSetting.promoNav4Label %></a></li>
+                <% } %>
+                <% if (promoSetting.promoNav5Label) { %>
+                <li><a href="<%= promoSetting.promoNav5Category ? '/shop?category=' + promoSetting.promoNav5Category : '/shop' %>" class="text-dark"><%= promoSetting.promoNav5Label %></a></li>
+                <% } %>
+                <% if (!promoSetting.promoNav1Label) { %>
+                <li><a href="/shop">Pırlanta Fırsatları Net %50 İndirim</a></li>
+                <li><a href="/shop" class="text-dark">Çok Satanlar</a></li>
+                <li><a href="/shop" class="text-dark">Hızlı Kargo</a></li>
+                <li><a href="/shop" class="text-dark">Hediye Önerileri</a></li>
+                <li><a href="/shop" class="text-dark">Online Özel</a></li>
+                <% } %>
             </ul>
         </div>
     </div>

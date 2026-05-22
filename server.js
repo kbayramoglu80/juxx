@@ -77,6 +77,18 @@ app.use(async (req, res, next) => {
         res.locals.globalCategories = [];
     }
     
+    try {
+        const HomeSetting = require('./models/HomeSetting');
+        let setting = await HomeSetting.findOne();
+        if (!setting) {
+            setting = new HomeSetting();
+            await setting.save();
+        }
+        res.locals.globalSetting = setting;
+    } catch (err) {
+        res.locals.globalSetting = {};
+    }
+    
     next();
 });
 
