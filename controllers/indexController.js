@@ -238,3 +238,7 @@ exports.getCheckout = (req, res) => {
     
     res.render('checkout');
 };
+
+exports.getRingSizeFinder = (req, res) => {
+    res.render('yuzuk_olcusu', { embed: req.query.embed === 'true' });
+};

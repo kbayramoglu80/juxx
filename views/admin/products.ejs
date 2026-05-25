@@ -290,6 +290,7 @@
                                             <option value="Emerald">Emerald</option>
                                             <option value="Cushion">Cushion</option>
                                             <option value="Heart">Heart</option>
+                                            <option value="Radiant">Radiant</option>
                                         </select>
                                     </div>
                                 </div>
@@ -523,6 +524,7 @@
                                             <option value="Emerald">Emerald</option>
                                             <option value="Cushion">Cushion</option>
                                             <option value="Heart">Heart</option>
+                                            <option value="Radiant">Radiant</option>
                                         </select>
                                     </div>
                                 </div>
@@ -902,63 +904,138 @@
         });
     }
 
-    // ADD modal \u2014 galeri g\u00f6rselleri se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
+    // Helper function to compress images on the client side before upload to prevent Cloudinary 10MB size limits
+    function compressImage(file, callback) {
+        if (!file || !file.type.startsWith('image/')) {
+            callback(file);
+            return;
+        }
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(event) {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 1200;
+                
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob(function(blob) {
+                    const compressedFile = new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    if (compressedFile.size < file.size) {
+                        callback(compressedFile);
+                    } else {
+                        callback(file);
+                    }
+                }, 'image/jpeg', 0.8); // 80% JPEG quality is excellent and lightweight
+            };
+        };
+        reader.onerror = function() {
+            callback(file);
+        };
+    }
+
+    // ADD modal — galeri görselleri seçince AJAX ile Cloudinary'ye yükle (sıkıştırılmış olarak)
     $('#galleryFiles').on('change', function(e) {
         const files = e.target.files;
         if (!files || files.length === 0) return;
         const container = document.getElementById('createMediaContainer');
         Array.from(files).forEach(file => {
-            uploadAndAddMedia(file, container, false, 'image');
+            compressImage(file, function(compressedFile) {
+                uploadAndAddMedia(compressedFile, container, false, 'image');
+            });
         });
-        $(this).next('.custom-file-label').addClass('selected').html(files.length + ' g\u00f6rsel y\u00fckleniyor...');
-        this.value = ''; // Input'u s\u0131f\u0131rla (ayn\u0131 dosyay\u0131 tekrar se\u00e7ebilmek i\u00e7in)
+        $(this).next('.custom-file-label').addClass('selected').html(files.length + ' görsel yükleniyor...');
+        this.value = ''; // Input'u sıfırla
     });
 
-    // ADD modal \u2014 video se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
+    // ADD modal — video seçince AJAX ile Cloudinary'ye yükle
     $('#videoFile').on('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
         const container = document.getElementById('createMediaContainer');
-        // Varsa eski video thumbnail\u0131n\u0131 kald\u0131r
+        // Varsa eski video thumbnailını kaldır
         container.querySelectorAll('.draggable-media-item[data-type="video"]').forEach(el => el.remove());
         uploadAndAddMedia(file, container, false, 'video');
-        $(this).next('.custom-file-label').addClass('selected').html(file.name + ' y\u00fckleniyor...');
+        $(this).next('.custom-file-label').addClass('selected').html(file.name + ' yükleniyor...');
         this.value = '';
     });
 
-    // EDIT modal \u2014 yeni galeri g\u00f6rselleri se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
+    // EDIT modal — yeni galeri görselleri seçince AJAX ile Cloudinary'ye yükle (sıkıştırılmış olarak)
     $('#editGalleryFiles').on('change', function(e) {
         const files = e.target.files;
         if (!files || files.length === 0) return;
         const container = document.getElementById('editMediaContainer');
         Array.from(files).forEach(file => {
-            uploadAndAddMedia(file, container, true, 'image');
+            compressImage(file, function(compressedFile) {
+                uploadAndAddMedia(compressedFile, container, true, 'image');
+            });
         });
-        $(this).next('.custom-file-label').addClass('selected').html(files.length + ' g\u00f6rsel y\u00fckleniyor...');
+        $(this).next('.custom-file-label').addClass('selected').html(files.length + ' görsel yükleniyor...');
         this.value = '';
     });
 
-    // EDIT modal \u2014 video se\u00e7ince AJAX ile Cloudinary'ye y\u00fckle
+    // EDIT modal — video seçince AJAX ile Cloudinary'ye yükle
     $('#editVideoFile').on('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
         const container = document.getElementById('editMediaContainer');
         container.querySelectorAll('.draggable-media-item[data-type="video"]').forEach(el => el.remove());
         uploadAndAddMedia(file, container, true, 'video');
-        $(this).next('.custom-file-label').addClass('selected').html(file.name + ' y\u00fckleniyor...');
+        $(this).next('.custom-file-label').addClass('selected').html(file.name + ' yükleniyor...');
         this.value = '';
     });
 
 
-    // Bootstrap Custom File Input for generic name
+    // Bootstrap Custom File Input for generic name (with automatic client-side image compression)
     $('.custom-file-input').not('#editGalleryFiles, #editVideoFile, #galleryFiles, #videoFile').on('change', function(e) { 
-        let fileName = '';
-        if (e.target.files && e.target.files.length > 1) {
-            fileName = e.target.files.length + ' dosya seçildi';
+        const inputEl = this;
+        const file = e.target.files ? e.target.files[0] : null;
+        
+        if (file && file.type.startsWith('image/')) {
+            $(inputEl).next('.custom-file-label').html('<i class="fas fa-spinner fa-spin text-warning"></i> Sıkıştırılıyor...');
+            compressImage(file, function(compressedFile) {
+                try {
+                    const dt = new DataTransfer();
+                    dt.items.add(compressedFile);
+                    inputEl.files = dt.files;
+                    $(inputEl).next('.custom-file-label').addClass("selected").html(compressedFile.name + ' (Sıkıştırıldı)');
+                } catch (err) {
+                    console.error('DataTransfer failed:', err);
+                    $(inputEl).next('.custom-file-label').addClass("selected").html(file.name);
+                }
+            });
         } else {
-            fileName = $(this).val().split('\\').pop(); 
+            let fileName = '';
+            if (e.target.files && e.target.files.length > 1) {
+                fileName = e.target.files.length + ' dosya seçildi';
+            } else {
+                fileName = $(this).val().split('\\').pop(); 
+            }
+            $(this).next('.custom-file-label').addClass("selected").html(fileName); 
         }
-        $(this).next('.custom-file-label').addClass("selected").html(fileName); 
     });
 
     // --- Coklu Karat Secenekleri JS Yardimcilari ---

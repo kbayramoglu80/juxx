@@ -210,8 +210,15 @@ exports.addProduct = async (req, res) => {
             });
         }
 
-        // Video URL: AJAX ön-yükleme ile Cloudinary'ye yüklendi
-        const finalVideoUrl = videoUrl || '';
+        // Video URL: AJAX ön-yükleme ile Cloudinary'ye yüklendi (dizi gelirse ilkini/sonuncusunu alarak güvence altına alıyoruz)
+        let finalVideoUrl = '';
+        if (videoUrl) {
+            if (Array.isArray(videoUrl)) {
+                finalVideoUrl = videoUrl.filter(v => v && v !== '').pop() || '';
+            } else {
+                finalVideoUrl = videoUrl;
+            }
+        }
         const parsedVideoOrder = (videoOrder !== undefined && videoOrder !== '') ? parseInt(videoOrder) : 99;
 
         const parsedPrice = parseTurkishPrice(price);
@@ -354,7 +361,13 @@ exports.editProduct = async (req, res) => {
             updateData.videoUrl = '';
             updateData.videoOrder = 99;
         } else {
-            if (videoUrl) updateData.videoUrl = videoUrl;
+            if (videoUrl) {
+                if (Array.isArray(videoUrl)) {
+                    updateData.videoUrl = videoUrl.filter(v => v && v !== '').pop() || '';
+                } else {
+                    updateData.videoUrl = videoUrl;
+                }
+            }
             if (videoOrder !== undefined && videoOrder !== '') {
                 updateData.videoOrder = parseInt(videoOrder);
             }

@@ -8,6 +8,7 @@ router.get('/kategori/:slug', indexController.getCategory);
 router.get('/product/:id', indexController.getProductDetails);
 router.get('/about', indexController.getAbout);
 router.get('/contact', indexController.getContact);
+router.get('/yuzuk-olcusu-bulma', indexController.getRingSizeFinder);
 
 // Auth Shortcuts
 const authController = require('../controllers/authController');

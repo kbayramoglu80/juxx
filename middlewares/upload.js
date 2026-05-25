@@ -9,14 +9,14 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Cloudinary storage — resource_type: 'auto' ile her dosya türünü otomatik algılar
+// Cloudinary storage — resource_type explicitly set to support large video and image uploads correctly
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
         const isVideo = file.mimetype.startsWith('video/');
         return {
             folder:        isVideo ? 'mucevher-video' : 'mucevher-urun',
-            resource_type: 'auto'   // Cloudinary otomatik algılar (image/video/raw)
+            resource_type: isVideo ? 'video' : 'image'
         };
     }
 });

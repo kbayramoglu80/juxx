@@ -81,8 +81,6 @@
         font-family: sans-serif;
     }
     .header-middle {
-        border-top: 1px solid #f0f0f0;
-        border-bottom: 1px solid #f0f0f0;
         padding: 15px 0;
     }
     .header-nav {
@@ -364,6 +362,8 @@
                     <li><a href="/shop">Mağaza</a></li>
                 <% } %>
                 
+                <li><a href="/yuzuk-olcusu-bulma" style="color: #c49b45; font-weight: bold;"><i class="fas fa-gem"></i> Ölçü Bulucu</a></li>
+
                 <% if (user && user.role === 'admin') { %>
                     <li><a href="/admin" style="color: #d9534f; font-weight: bold;">Admin Paneli</a></li>
                 <% } %>
@@ -413,6 +413,7 @@
                 <li><a href="/shop?category=<%= category.slug %>"><%= category.name %></a></li>
             <% }); %>
         <% } %>
+        <li><a href="/yuzuk-olcusu-bulma">Yüzük Ölçüsü Hesaplama</a></li>
         <li><a href="/about">Hakkımızda</a></li>
         <li><a href="/contact">İletişim</a></li>
         <li><a href="<%= user ? '/user/profile' : '/auth/login' %>"><%= user ? 'Hesabım' : 'Giriş Yap / Kayıt Ol' %></a></li>
