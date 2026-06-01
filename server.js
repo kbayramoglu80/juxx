@@ -10,11 +10,18 @@ const chatController = require('./controllers/chatController');
 
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy settings (for Cloudflare, Nginx, etc.)
+app.set('trust proxy', true);
+
 // Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Explicitly parse x-www-form-urlencoded for PayTR
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    console.log('IP:', req.ip);
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body:', JSON.stringify(req.body || {}, null, 2));
     next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -22,6 +29,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Session
+const isProduction = process.env.NODE_ENV === 'production';
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -32,7 +40,9 @@ app.use(session({
     }),
     cookie: { 
         maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
-        secure: false // Set true in production with HTTPS
+        secure: isProduction,
+        httpOnly: true,
+        sameSite: 'lax'
     }
 }));
 
