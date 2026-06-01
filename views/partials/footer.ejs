@@ -17,10 +17,9 @@
                    </div>
                    <!-- social -->
                    <div class="footer-social">
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                </div>
+                        <a href="https://www.instagram.com/midiamondd/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                        <a href="https://wa.me/905070212222" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+                    </div>
             </div>
         </div>
     </div>
@@ -227,15 +226,32 @@ $(document).ready(function() {
                         setTimeout(() => btn.removeClass('fav-pulse'), 500);
                     } else {
                         icon.removeClass('fas fa-heart text-danger').addClass('far fa-heart');
-                        // If we are on the favorites page, remove the card smoothly
+                        // If we are on the favorites page or profile favorites tab, remove the card smoothly
                         const isFavoritesPage = window.location.pathname === '/user/favorites';
-                        if (isFavoritesPage) {
+                        const isProfileFavorites = window.location.pathname === '/user/profile' && btn.closest('#favorites').length > 0;
+                        if (isFavoritesPage || isProfileFavorites) {
                             const card = btn.closest('.col-xl-3, .col-lg-4, .col-md-6, .premium-card');
                             card.fadeOut(400, function() {
                                 $(this).remove();
-                                // Check if no favorites left
-                                if ($('.premium-grid .premium-card').length === 0) {
-                                    window.location.reload();
+                                // Check if no favorites left in this grid
+                                const grid = btn.closest('.premium-grid');
+                                if (grid.length && grid.find('.premium-card').length === 0) {
+                                    if (isFavoritesPage) {
+                                        window.location.reload();
+                                    } else {
+                                        // Show empty message dynamically on profile favorites tab
+                                        $('#favorites .billing_details').html(`
+                                            <h3>Favori Mücevherlerim</h3>
+                                            <div class="text-center" style="padding: 40px 0;">
+                                                <div style="margin-bottom: 20px;">
+                                                    <i class="far fa-heart" style="font-size: 48px; color: #c49b45; opacity: 0.5;"></i>
+                                                </div>
+                                                <h4 style="font-family: 'Outfit', sans-serif; font-weight: 300; color: #111; margin-bottom: 15px;">Henüz favori ürününüz bulunmamaktadır.</h4>
+                                                <p style="color: #666; font-size: 13px; margin-bottom: 20px;">Koleksiyonlarimizi incelemek için mağazamızı ziyaret edebilirsiniz.</p>
+                                                <a href="/shop" class="btn_3">Alışverişe Başla</a>
+                                            </div>
+                                        `);
+                                    }
                                 }
                             });
                         }

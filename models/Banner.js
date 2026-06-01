@@ -10,6 +10,18 @@ const bannerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    mobileImageUrl: {
+        type: String,
+        default: ''
+    },
+    desktopHeight: {
+        type: String,
+        default: '980px'
+    },
+    mobileHeight: {
+        type: String,
+        default: '124vw'
+    },
     title: String,
     subtitle: String,
     link: {

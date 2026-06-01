@@ -5,8 +5,8 @@ exports.getProfile = async (req, res) => {
     try {
         const userId = req.session.user._id || req.session.user.id;
         
-        // Fetch user data excluding password
-        const user = await User.findById(userId).select('-password');
+        // Fetch user data excluding password and populate favorites
+        const user = await User.findById(userId).select('-password').populate('favorites');
         
         if (!user) {
             req.session.user = null;

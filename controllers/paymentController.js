@@ -108,63 +108,96 @@ exports.createPaymentToken = async (req, res) => {
 
 exports.paymentCallback = async (req, res) => {
     try {
-        console.log('=== PAYTR WEBHOOK START ===');
+        console.log('========================================');
+        console.log('=== PAYTR WEBHOOK ALINDI ===');
+        console.log('Zaman:', new Date().toISOString());
         console.log('Method:', req.method);
         console.log('Headers:', JSON.stringify(req.headers, null, 2));
-        console.log('Body:', JSON.stringify(req.body || {}, null, 2));
+        console.log('Raw Body:', JSON.stringify(req.body || {}, null, 2));
 
         const body = req.body || {};
-        // PayTR'den gelen POST verisi
-        const { merchant_oid, status, total_amount, hash } = body;
+        
+        const merchant_oid = body.merchant_oid;
+        const status = body.status;
+        const total_amount = body.total_amount;
+        const hash = body.hash;
+        
+        console.log('Alınan Alanlar:');
+        console.log('  merchant_oid:', merchant_oid);
+        console.log('  status:', status);
+        console.log('  total_amount:', total_amount);
+        console.log('  hash:', hash ? 'VAR' : 'YOK');
         
         if (!merchant_oid || !status || !total_amount || !hash) {
-            console.error('PayTR Webhook Error: Missing required fields in request body.');
-            console.log('=== PAYTR WEBHOOK END (FAILED) ===');
-            return res.status(400).send('FAIL: Missing fields');
+            console.error('HATA: Eksik alanlar!');
+            console.log('Gerekli alanlar: merchant_oid, status, total_amount, hash');
+            console.log('========================================');
+            return res.status(400).send('FAIL');
         }
         
         const merchant_key = process.env.PAYTR_MERCHANT_KEY;
         const merchant_salt = process.env.PAYTR_MERCHANT_SALT;
         
-        console.log('Env merchant_key loaded:', merchant_key ? `Yes (Length: ${merchant_key.length}, Start: ${merchant_key.substring(0, 3)}...)` : 'No');
-        console.log('Env merchant_salt loaded:', merchant_salt ? `Yes (Length: ${merchant_salt.length}, Start: ${merchant_salt.substring(0, 3)}...)` : 'No');
-        
         if (!merchant_key || !merchant_salt) {
-            console.error('PayTR Webhook Error: PAYTR_MERCHANT_KEY or PAYTR_MERCHANT_SALT is not defined in environment variables.');
-            console.log('=== PAYTR WEBHOOK END (CONFIG ERROR) ===');
-            return res.status(500).send('ERROR: Missing environment configuration');
+            console.error('HATA: Çevre değişkenleri eksik!');
+            console.error('PAYTR_MERCHANT_KEY:', merchant_key ? 'VAR' : 'YOK');
+            console.error('PAYTR_MERCHANT_SALT:', merchant_salt ? 'VAR' : 'YOK');
+            console.log('========================================');
+            return res.status(500).send('ERROR');
         }
         
-        // Hash kontrolü
         const hash_str = merchant_oid + merchant_salt + status + total_amount;
         const calculated_hash = crypto.createHmac('sha256', merchant_key).update(hash_str).digest('base64');
         
-        console.log('Received Hash:', hash);
-        console.log('Calculated Hash:', calculated_hash);
+        console.log('Hash Kontrolü:');
+        console.log('  Gelen Hash:', hash);
+        console.log('  Hesaplanan Hash:', calculated_hash);
+        console.log('  Eşleşiyor mu?', hash === calculated_hash ? 'EVET' : 'HAYIR');
         
         if (hash !== calculated_hash) {
-            console.error('PayTR Webhook Hash Mismatch!');
-            console.log('=== PAYTR WEBHOOK END (HASH MISMATCH) ===');
+            console.error('HATA: Hash eşleşmesi başarısız!');
+            console.log('========================================');
             return res.send('PAYTR WATCH DOG HASH FAILED');
         }
         
         const order = await Order.findOne({ merchant_oid });
         
         if (!order) {
-            console.warn(`PayTR Webhook Warning: Order with merchant_oid ${merchant_oid} was not found in the database!`);
+            console.warn('UYARI: Sipariş veritabanında bulunamadı! merchant_oid:', merchant_oid);
         } else {
             order.paymentStatus = status === 'success' ? 'Paid' : 'Failed';
             await order.save();
-            console.log(`PayTR Webhook Success: Order ${merchant_oid} status updated to: ${order.paymentStatus}`);
+            console.log('BAŞARILI: Sipariş durumu güncellendi:', merchant_oid, '->', order.paymentStatus);
         }
         
-        console.log('=== PAYTR WEBHOOK END (OK) ===');
+        console.log('=== PAYTR WEBHOOK BAŞARILI ===');
+        console.log('========================================');
         res.send('OK');
     } catch (error) {
-        console.error('PayTR Webhook Error:', error);
-        console.log('=== PAYTR WEBHOOK END (ERROR) ===');
+        console.error('========================================');
+        console.error('=== PAYTR WEBHOOK HATA ===');
+        console.error('Hata:', error);
+        console.error('Stack:', error.stack);
+        console.error('========================================');
         res.status(500).send('ERROR');
     }
+};
+
+exports.paymentTest = (req, res) => {
+    const testData = {
+        status: 'success',
+        message: 'Payment callback endpoint is working!',
+        endpoint: '/payment/callback',
+        method: 'POST',
+        expected_fields: ['merchant_oid', 'status', 'total_amount', 'hash'],
+        documentation: 'Bu endpoint sadece POST isteklerini kabul eder. PayTR bildirimleri bu adrese gönderilir.',
+        server_time: new Date().toISOString()
+    };
+    
+    console.log('=== PAYTR TEST ENDPOINT ÇAĞRILDI ===');
+    console.log('Zaman:', testData.server_time);
+    
+    res.json(testData);
 };
 
 exports.paymentSuccess = (req, res) => {

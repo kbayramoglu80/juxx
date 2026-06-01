@@ -8,37 +8,17 @@
             padding-top: 15px !important;
         }
 
-        .slider-area .single-slider.slider-height {
-            min-height: 980px !important; /* Masaüstü boyutu büyütüldü */
-        }
-
-        @media (max-width: 1199px) {
-            .slider-area .single-slider.slider-height {
-                min-height: 850px !important;
-            }
+        .slider-area {
+            margin-top: 0;
         }
 
         @media (max-width: 991px) {
             .slider-area {
                 margin-top: 24px;
             }
-            .slider-area .single-slider.slider-height {
-                min-height: 750px !important; /* Tablet boyutu büyütüldü */
-            }
         }
 
         @media (max-width: 767px) {
-            .slider-area .single-slider.slider-height {
-                min-height: auto !important;
-                height: 124vw !important; /* Görsel en-boy oranına (928x1152 => ~1.24) göre tam uyum */
-                background-size: cover !important;
-                background-position: center center !important;
-            }
-
-            .slider-area .single-slider.hero-overly {
-                background-image: url('/assets/img/hero/whatsapp_hero_mobile.jpeg') !important;
-            }
-
             .slider-area .hero__caption {
                 padding: 0 12px !important;
             }
@@ -51,14 +31,61 @@
         }
 
         @media (max-width: 575px) {
-            .slider-area .single-slider.slider-height {
-                min-height: auto !important;
-                height: 124vw !important;
-            }
             .slider-area .hero__caption h1 {
                 font-size: 24px;
             }
         }
+
+        /* Dinamik Slider Stilleri */
+        <% if (typeof heroBanners !== 'undefined' && heroBanners.length > 0) { %>
+            <% heroBanners.forEach(banner => { %>
+                /* <%= banner.title || 'Slider' %> Masaüstü Stili */
+                .banner-item-<%= banner._id %> {
+                    min-height: <%= banner.desktopHeight || '980px' %> !important;
+                    background-image: url('<%= banner.imageUrl %>') !important;
+                    background-size: cover !important;
+                    background-position: center center !important;
+                }
+
+                @media (max-width: 1199px) {
+                    .banner-item-<%= banner._id %> {
+                        <% if ((banner.desktopHeight || '980px').endsWith('px')) { %>
+                            min-height: <%= Math.round(parseInt(banner.desktopHeight || '980') * 0.86) %>px !important;
+                        <% } else { %>
+                            min-height: <%= banner.desktopHeight || '980px' %> !important;
+                        <% } %>
+                    }
+                }
+
+                @media (max-width: 991px) {
+                    .banner-item-<%= banner._id %> {
+                        <% if ((banner.desktopHeight || '980px').endsWith('px')) { %>
+                            min-height: <%= Math.round(parseInt(banner.desktopHeight || '980') * 0.76) %>px !important;
+                        <% } else { %>
+                            min-height: <%= banner.desktopHeight || '980px' %> !important;
+                        <% } %>
+                    }
+                }
+
+                /* <%= banner.title || 'Slider' %> Mobil Stili */
+                @media (max-width: 767px) {
+                    .banner-item-<%= banner._id %> {
+                        min-height: auto !important;
+                        height: <%= banner.mobileHeight || '124vw' %> !important;
+                        background-image: url('<%= banner.mobileImageUrl || banner.imageUrl %>') !important;
+                        background-size: cover !important;
+                        background-position: center center !important;
+                    }
+                }
+
+                @media (max-width: 575px) {
+                    .banner-item-<%= banner._id %> {
+                        min-height: auto !important;
+                        height: <%= banner.mobileHeight || '124vw' %> !important;
+                    }
+                }
+            <% }); %>
+        <% } %>
     </style>
     <!--? Hero Area Start-->
     <div class="container-fluid">
@@ -66,13 +93,13 @@
             <div class="slider-active dot-style">
                 <% if (typeof heroBanners !== 'undefined' && heroBanners.length > 0) { %>
                     <% heroBanners.forEach(banner => { %>
-                        <div class="single-slider hero-overly slider-height d-flex align-items-center" style="background-image: url('<%= banner.imageUrl %>'); background-size: cover; background-position: center;">
+                        <div class="single-slider hero-overly slider-height d-flex align-items-center banner-item-<%= banner._id %>">
                             <div class="container">
                                 <div class="row justify-content-center">
                                     <div class="col-xl-8 col-lg-9">
                                         <!-- Hero Caption -->
                                         <div class="hero__caption">
-                                            <h1><%- banner.title.replace(/\n/g, '<br>') %></h1>
+                                            <h1><%- banner.title ? banner.title.replace(/\n/g, '<br>') : '' %></h1>
                                             <a href="<%= banner.link %>" class="btn"><%= banner.subtitle || 'Şimdi Al' %></a>
                                         </div>
                                     </div>

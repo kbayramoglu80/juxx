@@ -416,25 +416,81 @@ exports.getBanners = async (req, res) => {
 
 exports.addBanner = async (req, res) => {
     try {
-        const { type, imageUrl: textImageUrl, title, subtitle, link, order } = req.body;
-        let imageUrl = textImageUrl;
+        const { type, imageUrl: textImageUrl, title, subtitle, link, order, desktopHeight, mobileHeight } = req.body;
+        let imageUrl = textImageUrl || '';
+        let mobileImageUrl = '';
 
-        if (req.file) {
-            imageUrl = req.file.path; // Cloudinary URL
+        if (req.files) {
+            if (req.files['imageFile'] && req.files['imageFile'][0]) {
+                imageUrl = req.files['imageFile'][0].path;
+            }
+            if (req.files['mobileImageFile'] && req.files['mobileImageFile'][0]) {
+                mobileImageUrl = req.files['mobileImageFile'][0].path;
+            }
         }
 
-        const newBanner = new Banner({ type, imageUrl, title, subtitle, link, order });
+        const newBanner = new Banner({ 
+            type, 
+            imageUrl, 
+            mobileImageUrl, 
+            title, 
+            subtitle, 
+            link, 
+            order,
+            desktopHeight: desktopHeight || '980px',
+            mobileHeight: mobileHeight || '124vw'
+        });
         await newBanner.save();
-        res.redirect('/admin/banners');
+        res.redirect('/admin/banners?msg=success');
     } catch (err) {
         console.error(err);
-        res.redirect('/admin/banners');
+        res.redirect('/admin/banners?msg=error');
+    }
+};
+
+exports.editBanner = async (req, res) => {
+    try {
+        const { type, title, subtitle, link, order, desktopHeight, mobileHeight } = req.body;
+        const bannerId = req.params.id;
+        
+        const banner = await Banner.findById(bannerId);
+        if (!banner) {
+            return res.redirect('/admin/banners?error=notfound');
+        }
+
+        let imageUrl = banner.imageUrl;
+        let mobileImageUrl = banner.mobileImageUrl;
+
+        if (req.files) {
+            if (req.files['imageFile'] && req.files['imageFile'][0]) {
+                imageUrl = req.files['imageFile'][0].path;
+            }
+            if (req.files['mobileImageFile'] && req.files['mobileImageFile'][0]) {
+                mobileImageUrl = req.files['mobileImageFile'][0].path;
+            }
+        }
+
+        banner.type = type;
+        banner.imageUrl = imageUrl;
+        banner.mobileImageUrl = mobileImageUrl;
+        banner.title = title;
+        banner.subtitle = subtitle;
+        banner.link = link || '/shop';
+        banner.order = parseInt(order) || 0;
+        banner.desktopHeight = desktopHeight || '980px';
+        banner.mobileHeight = mobileHeight || '124vw';
+
+        await banner.save();
+        res.redirect('/admin/banners?msg=success');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/banners?msg=error');
     }
 };
 
 exports.deleteBanner = async (req, res) => {
     await Banner.findByIdAndDelete(req.params.id);
-    res.redirect('/admin/banners');
+    res.redirect('/admin/banners?msg=success');
 };
 
 // Kategori Yönetimi
