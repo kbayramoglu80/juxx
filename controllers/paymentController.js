@@ -252,11 +252,73 @@ exports.paymentFail = (req, res) => {
 };
 
 exports.paymentCallbackGet = (req, res) => {
-    console.error('PayTR Webhook GET Error: Received GET request instead of POST!');
-    res.status(405).send(
-        'HATA: Sunucunuza POST yerine GET isteği ulaştı! ' +
-        'Bu durum, sitenizde etkin olan otomatik bir yönlendirmeden (HTTP -> HTTPS veya www. -> non-www) kaynaklanır. ' +
-        'PayTR bildirimleri sadece POST isteği ile gönderir, ancak yönlendirmeler tarayıcı/istemci tarafından POST isteğini GET isteğine dönüştürür ve veri kaybına yol açar. ' +
-        'Lütfen PayTR Mağaza Paneli -> Ayarlar bölümündeki Bildirim URL bilgisini yönlendirme yapmayan nihai URL (örneğin doğrudan https://midiamond.com.tr/payment/callback) olarak güncelleyin veya sunucunuzun yönlendirme ayarlarını kontrol edin.'
-    );
+    console.error('========================================');
+    console.error('=== DİKKAT: POST YERİNE GET İSTEĞİ ULAŞTI! ===');
+    console.error('Zaman:', new Date().toISOString());
+    console.error('URL:', req.protocol + '://' + req.get('host') + req.originalUrl);
+    console.error('Headers:', JSON.stringify(req.headers, null, 2));
+    console.error('========================================');
+    
+    const currentUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+    
+    res.status(405).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>PayTR Callback Hatası</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; line-height: 1.6; }
+                .error { color: #dc3545; background: #f8d7da; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                .info { background: #d1ecf1; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                .success { background: #d4edda; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                code { background: #f8f9fa; padding: 3px 8px; border-radius: 4px; }
+                h1 { color: #333; }
+            </style>
+        </head>
+        <body>
+            <h1>⚠️ PayTR Callback Yönlendirme Sorunu</h1>
+            
+            <div class="error">
+                <strong>HATA:</strong> Sunucunuza POST yerine GET isteği ulaştı!
+            </div>
+            
+            <div class="info">
+                <strong>Şu anki URL:</strong> <code>${currentUrl}</code>
+            </div>
+            
+            <div class="info">
+                <h3>Bu hatanın sebebi:</h3>
+                <p>Sitenizde otomatik bir yönlendirme (redirect) var:</p>
+                <ul>
+                    <li><code>http://</code> → <code>https://</code> yönlendirmesi</li>
+                    <li><code>www.midiamond.com.tr</code> → <code>midiamond.com.tr</code> yönlendirmesi</li>
+                    <li>veya tam tersi</li>
+                </ul>
+                <p>Yönlendirmeler POST isteklerini GET'e çevirir ve PayTR verileri kaybolur!</p>
+            </div>
+            
+            <div class="success">
+                <h3>✅ ÇÖZÜM:</h3>
+                <p><strong>1. PayTR Panelinde Bildirim URL'sini güncelleyin:</strong></p>
+                <p>Aşağıdaki URL'lerden hangisi <strong>yönlendirme yapmadan</strong> direkt çalışıyorsa onu kullanın:</p>
+                <ul>
+                    <li><code>https://www.midiamond.com.tr/payment/callback</code></li>
+                    <li><code>https://midiamond.com.tr/payment/callback</code></li>
+                </ul>
+                
+                <p><strong>2. Hangisini kullanmalısınız?</strong></p>
+                <p>Her ikisini de tarayıcıda açıp hangisi yönlendirme yapmadan kalıyorsa onu PayTR panelinde ayarlayın.</p>
+                
+                <p><strong>3. Veya sunucu ayarlarınızı düzenleyin:</strong></p>
+                <p>/payment/callback adresine gelen istekleri yönlendirmeden direkt Node.js uygulamanıza gönderin.</p>
+            </div>
+            
+            <div class="info">
+                <h3>Test Edin:</h3>
+                <p><a href="/payment/debug">Debug sayfasına git</a></p>
+            </div>
+        </body>
+        </html>
+    `);
 };
