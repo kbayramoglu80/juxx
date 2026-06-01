@@ -29,6 +29,7 @@ router.get('/banners', adminController.getBanners);
 router.post('/banners/add', upload.fields([{ name: 'imageFile', maxCount: 1 }, { name: 'mobileImageFile', maxCount: 1 }]), adminController.addBanner);
 router.post('/banners/edit/:id', upload.fields([{ name: 'imageFile', maxCount: 1 }, { name: 'mobileImageFile', maxCount: 1 }]), adminController.editBanner);
 router.get('/banners/delete/:id', adminController.deleteBanner);
+router.get('/banners/toggle/:id', adminController.toggleBannerActive);
 
 router.get('/categories', adminController.getCategories);
 router.post('/categories/add', adminController.addCategory);

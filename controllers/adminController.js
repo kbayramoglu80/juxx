@@ -13,12 +13,12 @@ exports.getSupport = async (req, res) => {
         // Hem gönderen hem de alan tarafında kullanıcıyı ara (Admin olmayan taraf)
         const sentUsers = await Message.distinct('sender', { isAdminSender: false });
         const receivedUsers = await Message.distinct('receiver', { isAdminSender: true });
-        
+
         // Benzersiz kullanıcı ID'lerini birleştir
         const allUserIds = [...new Set([...sentUsers, ...receivedUsers])].filter(id => id != null);
-        
+
         const users = await User.find({ _id: { $in: allUserIds } });
-        
+
         res.render('admin/support', { users });
     } catch (err) {
         res.status(500).send(err.message);
@@ -34,7 +34,7 @@ exports.getUserMessages = async (req, res) => {
                 { receiver: userId }
             ]
         }).sort({ createdAt: 1 });
-        
+
         const user = await User.findById(userId);
         res.json({ success: true, messages, user });
     } catch (err) {
@@ -50,7 +50,7 @@ exports.sendAdminMessage = async (req, res) => {
             isAdminSender: true,
             content
         });
-        
+
         await newMessage.save();
         res.json({ success: true, message: newMessage });
     } catch (err) {
@@ -103,11 +103,11 @@ exports.getDashboard = async (req, res) => {
         const orderCount = await Order.countDocuments();
         const userCount = await User.countDocuments();
         const recentOrders = await Order.find().populate('user').sort({ createdAt: -1 }).limit(5);
-        
-        res.render('admin/dashboard', { 
-            productCount, 
-            orderCount, 
-            userCount, 
+
+        res.render('admin/dashboard', {
+            productCount,
+            orderCount,
+            userCount,
             recentOrders
         });
     } catch (err) {
@@ -143,13 +143,13 @@ exports.getProducts = async (req, res) => {
 const parseTurkishPrice = (priceVal) => {
     if (priceVal === undefined || priceVal === null || priceVal === '') return 0;
     if (typeof priceVal === 'number') return priceVal;
-    
+
     let cleaned = priceVal.toString().trim();
-    
+
     // If there is both a dot and a comma, remove the dot and replace the comma with a dot
     if (cleaned.includes('.') && cleaned.includes(',')) {
         cleaned = cleaned.replace(/\./g, '').replace(/,/g, '.');
-    } 
+    }
     // If there is only a dot and it's followed by exactly 3 digits, it's a thousands separator (e.g., "30.000")
     else if (cleaned.includes('.') && !cleaned.includes(',')) {
         const parts = cleaned.split('.');
@@ -162,7 +162,7 @@ const parseTurkishPrice = (priceVal) => {
     else if (cleaned.includes(',') && !cleaned.includes('.')) {
         cleaned = cleaned.replace(/,/g, '.');
     }
-    
+
     const parsed = parseFloat(cleaned);
     return isNaN(parsed) ? 0 : parsed;
 };
@@ -182,13 +182,13 @@ exports.uploadTemp = async (req, res) => {
 
 exports.addProduct = async (req, res) => {
     try {
-        const { 
-            name, description, price, category, stock, isPopular, 
+        const {
+            name, description, price, category, stock, isPopular,
             existingImages, existingImagesOrder, videoUrl, videoOrder,
             productCode, metal, metalColor, gemType, caratWeight,
             gemColor, gemClarity, gemCut, certificate
         } = req.body;
-        
+
         // Ana görsel: doğrudan dosya yüklemesi (multer → Cloudinary)
         let imageUrl = '/assets/img/gallery/popular1.png';
         if (req.file) {
@@ -199,12 +199,12 @@ exports.addProduct = async (req, res) => {
         let images = [];
         if (existingImages) {
             const keptImages = Array.isArray(existingImages) ? existingImages : [existingImages];
-            const keptImagesOrder = existingImagesOrder 
+            const keptImagesOrder = existingImagesOrder
                 ? (Array.isArray(existingImagesOrder) ? existingImagesOrder : [existingImagesOrder])
                 : [];
             keptImages.forEach((url, index) => {
                 if (!url) return;
-                const orderVal = (keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
+                const orderVal = (keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '')
                     ? parseInt(keptImagesOrder[index]) : index;
                 images.push({ url, order: orderVal });
             });
@@ -253,8 +253,8 @@ exports.addProduct = async (req, res) => {
             });
         }
 
-        const newProduct = new Product({ 
-            name, description, price: parsedPrice, category, stock, 
+        const newProduct = new Product({
+            name, description, price: parsedPrice, category, stock,
             imageUrl, images,
             videoUrl: finalVideoUrl,
             videoOrder: parsedVideoOrder,
@@ -281,13 +281,13 @@ exports.addProduct = async (req, res) => {
 
 exports.editProduct = async (req, res) => {
     try {
-        const { 
-            name, description, price, category, stock, isPopular, 
+        const {
+            name, description, price, category, stock, isPopular,
             existingImages, videoUrl, videoOrder, deleteVideo,
             productCode, metal, metalColor, gemType, caratWeight,
             gemColor, gemClarity, gemCut, certificate
         } = req.body;
-        
+
         const parsedPrice = parseTurkishPrice(price);
 
         let parsedCarat = null;
@@ -344,12 +344,12 @@ exports.editProduct = async (req, res) => {
         let images = [];
         if (existingImages) {
             const keptImages = Array.isArray(existingImages) ? existingImages : [existingImages];
-            const keptImagesOrder = req.body.existingImagesOrder 
+            const keptImagesOrder = req.body.existingImagesOrder
                 ? (Array.isArray(req.body.existingImagesOrder) ? req.body.existingImagesOrder : [req.body.existingImagesOrder])
                 : [];
             keptImages.forEach((url, index) => {
                 if (!url) return;
-                const orderVal = (keptImagesOrder && keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '') 
+                const orderVal = (keptImagesOrder && keptImagesOrder[index] !== undefined && keptImagesOrder[index] !== '')
                     ? parseInt(keptImagesOrder[index]) : index;
                 images.push({ url, order: orderVal });
             });
@@ -429,16 +429,17 @@ exports.addBanner = async (req, res) => {
             }
         }
 
-        const newBanner = new Banner({ 
-            type, 
-            imageUrl, 
-            mobileImageUrl, 
-            title, 
-            subtitle, 
-            link, 
+        const newBanner = new Banner({
+            type,
+            imageUrl,
+            mobileImageUrl,
+            title,
+            subtitle,
+            link,
             order,
             desktopHeight: desktopHeight || '980px',
-            mobileHeight: mobileHeight || '124vw'
+            mobileHeight: mobileHeight || '124vw',
+            isActive: true
         });
         await newBanner.save();
         res.redirect('/admin/banners?msg=success');
@@ -450,9 +451,9 @@ exports.addBanner = async (req, res) => {
 
 exports.editBanner = async (req, res) => {
     try {
-        const { type, title, subtitle, link, order, desktopHeight, mobileHeight } = req.body;
+        const { type, title, subtitle, link, order, desktopHeight, mobileHeight, isActive } = req.body;
         const bannerId = req.params.id;
-        
+
         const banner = await Banner.findById(bannerId);
         if (!banner) {
             return res.redirect('/admin/banners?error=notfound');
@@ -479,6 +480,7 @@ exports.editBanner = async (req, res) => {
         banner.order = parseInt(order) || 0;
         banner.desktopHeight = desktopHeight || '980px';
         banner.mobileHeight = mobileHeight || '124vw';
+        banner.isActive = isActive === 'on';
 
         await banner.save();
         res.redirect('/admin/banners?msg=success');
@@ -493,6 +495,21 @@ exports.deleteBanner = async (req, res) => {
     res.redirect('/admin/banners?msg=success');
 };
 
+exports.toggleBannerActive = async (req, res) => {
+    try {
+        const banner = await Banner.findById(req.params.id);
+        if (!banner) {
+            return res.redirect('/admin/banners?msg=error');
+        }
+        banner.isActive = !banner.isActive;
+        await banner.save();
+        res.redirect('/admin/banners?msg=success');
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin/banners?msg=error');
+    }
+};
+
 // Kategori Yönetimi
 exports.getCategories = async (req, res) => {
     const categories = await Category.find().sort({ order: 1, name: 1 });
@@ -503,10 +520,10 @@ exports.addCategory = async (req, res) => {
     try {
         const { name, order } = req.body;
         const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-        const newCategory = new Category({ 
-            name, 
-            slug, 
-            order: parseInt(order) || 0 
+        const newCategory = new Category({
+            name,
+            slug,
+            order: parseInt(order) || 0
         });
         await newCategory.save();
         res.redirect('/admin/categories');
@@ -520,10 +537,10 @@ exports.editCategory = async (req, res) => {
     try {
         const { name, order } = req.body;
         const slug = name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-        await Category.findByIdAndUpdate(req.params.id, { 
-            name, 
-            slug, 
-            order: parseInt(order) || 0 
+        await Category.findByIdAndUpdate(req.params.id, {
+            name,
+            slug,
+            order: parseInt(order) || 0
         });
         res.redirect('/admin/categories');
     } catch (err) {
@@ -551,9 +568,9 @@ exports.getHomeSettings = async (req, res) => {
         const products = await Product.find().sort({ name: 1 });
         const categories = await Category.find().sort({ order: 1, name: 1 });
 
-        res.render('admin/home_settings', { 
-            setting, 
-            sections, 
+        res.render('admin/home_settings', {
+            setting,
+            sections,
             products,
             categories
         });
@@ -565,7 +582,7 @@ exports.getHomeSettings = async (req, res) => {
 
 exports.updateHomeSettings = async (req, res) => {
     try {
-        const { 
+        const {
             newArrivalTitle,
             service1Title, service1Desc,
             service2Title, service2Desc,
@@ -592,15 +609,15 @@ exports.updateHomeSettings = async (req, res) => {
         setting.service3Desc = service3Desc;
         setting.service4Title = service4Title;
         setting.service4Desc = service4Desc;
-        setting.promoNav1Label    = promoNav1Label || '';
+        setting.promoNav1Label = promoNav1Label || '';
         setting.promoNav1Category = promoNav1Category || '';
-        setting.promoNav2Label    = promoNav2Label || '';
+        setting.promoNav2Label = promoNav2Label || '';
         setting.promoNav2Category = promoNav2Category || '';
-        setting.promoNav3Label    = promoNav3Label || '';
+        setting.promoNav3Label = promoNav3Label || '';
         setting.promoNav3Category = promoNav3Category || '';
-        setting.promoNav4Label    = promoNav4Label || '';
+        setting.promoNav4Label = promoNav4Label || '';
         setting.promoNav4Category = promoNav4Category || '';
-        setting.promoNav5Label    = promoNav5Label || '';
+        setting.promoNav5Label = promoNav5Label || '';
         setting.promoNav5Category = promoNav5Category || '';
 
         await setting.save();
@@ -615,10 +632,10 @@ exports.updateHomeSettings = async (req, res) => {
 exports.addHomeSection = async (req, res) => {
     try {
         const { title, order, products } = req.body;
-        const productIds = products 
+        const productIds = products
             ? (Array.isArray(products) ? products : [products])
             : [];
-            
+
         const newSection = new HomeSection({
             title,
             order: parseInt(order) || 0,
@@ -636,7 +653,7 @@ exports.addHomeSection = async (req, res) => {
 exports.editHomeSection = async (req, res) => {
     try {
         const { title, order, products } = req.body;
-        const productIds = products 
+        const productIds = products
             ? (Array.isArray(products) ? products : [products])
             : [];
 

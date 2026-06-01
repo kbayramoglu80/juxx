@@ -8,8 +8,8 @@ exports.getHome = async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 }).limit(100);
         const popularProducts = await Product.find({ isPopular: true }).limit(5);
-        const heroBanners = await Banner.find({ type: 'hero' }).sort({ order: 1 });
-        const middleBanners = await Banner.find({ type: 'middle' }).sort({ order: 1 });
+        const heroBanners = await Banner.find({ type: 'hero', isActive: true }).sort({ order: 1 });
+        const middleBanners = await Banner.find({ type: 'middle', isActive: true }).sort({ order: 1 });
         const categories = await Category.find().sort({ order: 1, name: 1 });
         
         let setting = await HomeSetting.findOne();

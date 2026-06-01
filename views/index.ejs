@@ -425,8 +425,7 @@
                             <div class="container">
                                 <div class="row justify-content-center mb-40">
                                     <div class="col-xl-7 col-lg-8 col-md-10 text-center">
-                                        <div class="section-tittle mb-20 wow fadeInUp" data-wow-duration="2s"
-                                            data-wow-delay=".2s">
+                                        <div class="section-tittle mb-20">
                                             <h2>
                                                 <%= sec.title %>
                                             </h2>
@@ -435,8 +434,7 @@
                                 </div>
                                 <div class="premium-grid">
                                     <% sec.products.forEach(product=> { %>
-                                        <div class="premium-card wow fadeInUp" data-wow-duration="1s"
-                                            data-wow-delay=".1s">
+                                        <div class="premium-card">
                                             <div class="premium-card-img-wrapper">
                                                 <a href="/product/<%= product._id %>">
                                                     <img src="<%= product.imageUrl %>" alt="<%= product.name %>"

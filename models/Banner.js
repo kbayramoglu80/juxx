@@ -32,6 +32,10 @@ const bannerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Date,
         default: Date.now
