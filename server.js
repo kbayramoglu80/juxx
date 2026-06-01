@@ -14,16 +14,17 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', true);
 
 // ------------------------------
-// PAYTR CALLBACK ÖNCELİKLE ÇALIŞSIN!
+// 1. BODY PARSER'İ EN BAŞTA ÇALIŞTIR!
 // ------------------------------
-// Bu satırı en üste koyduk ki yönlendirmelerden etkilenmesin
-const paymentController = require('./controllers/paymentController');
-app.post('/payment/callback', paymentController.paymentCallback);
-
-// Middleware
-// Explicitly parse x-www-form-urlencoded for PayTR
+// PayTR x-www-form-urlencoded gönderir, bunu önce çözmeliyiz
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json({ limit: '10mb' }));
+
+// ------------------------------
+// 2. SONRA PAYTR CALLBACK'İNİ ÇALIŞTIR!
+// ------------------------------
+const paymentController = require('./controllers/paymentController');
+app.post('/payment/callback', paymentController.paymentCallback);
 app.use((req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
     console.log('IP:', req.ip);

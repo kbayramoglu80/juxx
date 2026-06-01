@@ -107,63 +107,74 @@ exports.createPaymentToken = async (req, res) => {
 };
 
 exports.paymentCallback = async (req, res) => {
+    // ------------------------------
+    // 1. ADIM: HER ŞEYDEN ÖNCE "OK" YANITINI DÖN!
+    // Bu, PayTR'nin isteği başarıyla aldığımızı bildirsin
+    // ------------------------------
+    console.log('========================================');
+    console.log('=== PAYTR WEBHOOK ALINDI ===');
+    console.log('Zaman:', new Date().toISOString());
+    console.log('Method:', req.method);
+    console.log('IP:', req.ip);
+    console.log('Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('Body:', JSON.stringify(req.body || {}, null, 2));
+    
+    // HEMEN "OK" YANITINI DÖN - PayTR bunu bekliyor!
+    res.send('OK');
+    
+    // ------------------------------
+    // 2. ADIM: ARKADAN İSTEĞİ İŞLE
+    // ------------------------------
     try {
-        console.log('========================================');
-        console.log('=== PAYTR WEBHOOK ALINDI ===');
-        console.log('Zaman:', new Date().toISOString());
-        console.log('Method:', req.method);
-        console.log('IP:', req.ip);
-        console.log('Headers:', JSON.stringify(req.headers, null, 2));
-        console.log('Body:', JSON.stringify(req.body || {}, null, 2));
-
-        let body = req.body || {};
-
+        const body = req.body || {};
         const merchant_oid = body.merchant_oid;
         const status = body.status;
         const total_amount = body.total_amount;
         const hash = body.hash;
-
+        const payment_type = body.payment_type;
+        
         console.log('Alınan Alanlar:');
         console.log('  merchant_oid:', merchant_oid);
         console.log('  status:', status);
         console.log('  total_amount:', total_amount);
-        console.log('  hash:', hash ? 'VAR (' + hash.length + ' karakter)' : 'YOK');
-
+        console.log('  hash:', hash);
+        console.log('  payment_type:', payment_type);
+        
+        // Gerekli alanları kontrol et
         if (!merchant_oid || !status || !total_amount || !hash) {
             console.error('HATA: Eksik alanlar!');
-            console.log('Gerekli alanlar: merchant_oid, status, total_amount, hash');
-            console.log('Body:', JSON.stringify(body, null, 2));
             console.log('========================================');
-            return res.status(400).send('FAIL');
+            return;
         }
-
+        
         const merchant_key = process.env.PAYTR_MERCHANT_KEY;
         const merchant_salt = process.env.PAYTR_MERCHANT_SALT;
-
+        
         if (!merchant_key || !merchant_salt) {
             console.error('HATA: Çevre değişkenleri eksik!');
-            console.error('PAYTR_MERCHANT_KEY:', merchant_key ? 'VAR' : 'YOK');
-            console.error('PAYTR_MERCHANT_SALT:', merchant_salt ? 'VAR' : 'YOK');
             console.log('========================================');
-            return res.status(500).send('ERROR');
+            return;
         }
-
+        
+        // Hash oluştur
+        // PayTR dökümanına göre hash kontrolü
         const hash_str = merchant_oid + merchant_salt + status + total_amount;
         const calculated_hash = crypto.createHmac('sha256', merchant_key).update(hash_str).digest('base64');
-
+        
         console.log('Hash Kontrolü:');
         console.log('  Gelen Hash:', hash);
         console.log('  Hesaplanan Hash:', calculated_hash);
         console.log('  Eşleşiyor mu?', hash === calculated_hash ? 'EVET ✓' : 'HAYIR ✗');
-
+        
         if (hash !== calculated_hash) {
             console.error('HATA: Hash eşleşmesi başarısız!');
             console.log('========================================');
-            return res.send('PAYTR WATCH DOG HASH FAILED');
+            return;
         }
-
+        
+        // Siparişi bul ve güncelle
         const order = await Order.findOne({ merchant_oid });
-
+        
         if (!order) {
             console.warn('UYARI: Sipariş veritabanında bulunamadı! merchant_oid:', merchant_oid);
         } else {
@@ -171,17 +182,15 @@ exports.paymentCallback = async (req, res) => {
             await order.save();
             console.log('BAŞARILI: Sipariş durumu güncellendi:', merchant_oid, '->', order.paymentStatus);
         }
-
-        console.log('=== PAYTR WEBHOOK BAŞARILI ===');
+        
+        console.log('=== PAYTR İŞLEMİ TAMAMLANDI ===');
         console.log('========================================');
-        res.send('OK');
     } catch (error) {
         console.error('========================================');
-        console.error('=== PAYTR WEBHOOK HATA ===');
+        console.error('=== PAYTR WEBHOOK İŞLEM HATASI (AMA OK yanıtı zaten gönderildi) ===');
         console.error('Hata:', error);
         console.error('Stack:', error.stack);
         console.error('========================================');
-        res.status(500).send('ERROR');
     }
 };
 
