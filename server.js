@@ -13,6 +13,13 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy settings (for Cloudflare, Nginx, etc.)
 app.set('trust proxy', true);
 
+// ------------------------------
+// PAYTR CALLBACK ÖNCELİKLE ÇALIŞSIN!
+// ------------------------------
+// Bu satırı en üste koyduk ki yönlendirmelerden etkilenmesin
+const paymentController = require('./controllers/paymentController');
+app.post('/payment/callback', paymentController.paymentCallback);
+
 // Middleware
 // Explicitly parse x-www-form-urlencoded for PayTR
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -38,7 +45,7 @@ app.use(session({
         mongoUrl: process.env.MONGODB_URI,
         ttl: 14 * 24 * 60 * 60 // 14 days
     }),
-    cookie: { 
+    cookie: {
         maxAge: 1000 * 60 * 60 * 24 * 14, // 14 days
         secure: isProduction,
         httpOnly: true,
@@ -49,7 +56,7 @@ app.use(session({
 // Global variables for views
 app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
-    
+
     // Fetch user favorites if logged in
     res.locals.userFavorites = [];
     if (req.session.user) {
@@ -63,13 +70,13 @@ app.use(async (req, res, next) => {
             console.error('Error fetching global favorites:', err);
         }
     }
-    
+
     // Initialize cart if not exists
     if (!req.session.cart) {
         req.session.cart = [];
     }
     res.locals.cart = req.session.cart;
-    
+
     // Calculate total count and amount
     let cartCount = 0;
     let cartTotal = 0;
@@ -79,14 +86,14 @@ app.use(async (req, res, next) => {
     });
     res.locals.cartCount = cartCount;
     res.locals.cartTotal = cartTotal;
-    
+
     try {
         const Category = require('./models/Category');
         res.locals.globalCategories = await Category.find().sort({ order: 1, name: 1 });
     } catch (err) {
         res.locals.globalCategories = [];
     }
-    
+
     try {
         const HomeSetting = require('./models/HomeSetting');
         let setting = await HomeSetting.findOne();
@@ -98,7 +105,7 @@ app.use(async (req, res, next) => {
     } catch (err) {
         res.locals.globalSetting = {};
     }
-    
+
     next();
 });
 

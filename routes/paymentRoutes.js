@@ -3,7 +3,7 @@ const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 
 router.post('/create-token', paymentController.createPaymentToken);
-router.post('/callback', paymentController.paymentCallback);
+// NOT: POST /payment/callback zaten server.js'de en üstte tanımlandı!
 router.get('/callback', paymentController.paymentCallbackGet);
 router.get('/test', paymentController.paymentTest);
 router.get('/debug', paymentController.paymentDebug);
