@@ -500,6 +500,7 @@
                                         }
                                     </style>
 
+
                                     <script>
                                         document.addEventListener('DOMContentLoaded', function () {
                                             const grid = document.getElementById('homeProductGrid');
@@ -567,7 +568,303 @@
 
                                             updateVisibility();
                                         });
+
+                                        // Ana sayfa yüzük ölçü tablosu
+                                        const ringSizeChartHome = [
+                                            { size: 7, diameter: 14.96 },
+                                            { size: 8, diameter: 15.28 },
+                                            { size: 9, diameter: 15.61 },
+                                            { size: 10, diameter: 15.92 },
+                                            { size: 11, diameter: 16.24 },
+                                            { size: 12, diameter: 16.56 },
+                                            { size: 13, diameter: 16.88 },
+                                            { size: 14, diameter: 17.20 },
+                                            { size: 15, diameter: 17.52 },
+                                            { size: 16, diameter: 17.83 },
+                                            { size: 17, diameter: 18.15 },
+                                            { size: 18, diameter: 18.47 },
+                                            { size: 19, diameter: 18.79 },
+                                            { size: 20, diameter: 19.11 },
+                                            { size: 21, diameter: 19.43 },
+                                            { size: 22, diameter: 19.75 },
+                                            { size: 23, diameter: 20.06 },
+                                            { size: 24, diameter: 20.38 },
+                                            { size: 25, diameter: 20.70 },
+                                            { size: 26, diameter: 21.02 },
+                                            { size: 27, diameter: 21.34 },
+                                            { size: 28, diameter: 21.66 },
+                                            { size: 29, diameter: 21.97 },
+                                            { size: 30, diameter: 22.29 }
+                                        ];
+
+                                        let currentProduct = null;
+                                        let mcurrentStepHome = 1;
+                                        let mpxPerMmHome = 7.6481;
+                                        let mcalibrationCirclePixelsHome = 200;
+
+                                        // Ana sayfa sepete ekleme modalı
+                                        function openHomeAddToCartModal(productId, productName, productPrice, productImage) {
+                                            currentProduct = {
+                                                _id: productId,
+                                                name: productName,
+                                                price: productPrice,
+                                                imageUrl: productImage
+                                            };
+
+                                            const modal = document.getElementById('addToCartModal');
+                                            const content = document.getElementById('modal-product-content');
+
+                                            // Modal içeriğini doldur
+                                            content.innerHTML = `
+                                                <img src="${productImage}" alt="${productName}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; margin-bottom: 15px;">
+                                                <h3 style="font-size: 18px; font-weight: 700; color: #140C40; margin-bottom: 8px;">${productName}</h3>
+                                                <p style="font-size: 20px; font-weight: 700; color: #ff2020; margin-bottom: 20px;">₺${parseFloat(productPrice).toLocaleString('tr-TR')}</p>
+                                                
+                                                <div class="variation-group" style="text-align: left; margin-bottom: 15px;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                                        <span style="font-weight: 600; color: #333;">Yüzük Ölçüsü</span>
+                                                        <a href="javascript:void(0)" onclick="openRingSizeModalHome()" style="font-size: 12px; color: #c5a059; font-weight: 600; text-decoration: underline;"><i class="fas fa-question-circle"></i> Ölçümü Nasıl Bulurum?</a>
+                                                    </div>
+                                                    <select id="selected-size-home" class="premium-select" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                                                        <option value="">Seçiniz</option>
+                                                        ${ringSizeChartHome.map(s => `<option value="${s.size}">${s.size}</option>`).join('')}
+                                                    </select>
+                                                </div>
+                                                
+                                                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                                    <button onclick="closeAddToCartModal()" class="btn-premium-secondary" style="flex: 1; padding: 12px 20px; font-size: 14px;">İptal</button>
+                                                    <button onclick="addToCartFromHome()" class="btn-premium-primary" style="flex: 1; padding: 12px 20px; font-size: 14px;">Sepete Ekle</button>
+                                                </div>
+                                            `;
+
+                                            modal.style.display = 'flex';
+                                            document.body.style.overflow = 'hidden';
+                                        }
+
+                                        function closeAddToCartModal() {
+                                            const modal = document.getElementById('addToCartModal');
+                                            modal.style.display = 'none';
+                                            document.body.style.overflow = '';
+                                        }
+
+                                        // Ana sayfadan sepete ekleme
+                                        function addToCartFromHome() {
+                                            if (!currentProduct) return;
+
+                                            const sizeSelect = document.getElementById('selected-size-home');
+                                            const selectedSize = sizeSelect.value;
+
+                                            if (!selectedSize) {
+                                                alert('Lütfen bir yüzük ölçüsü seçin!');
+                                                return;
+                                            }
+
+                                            // Form oluşturalım ve POST edelim
+                                            const form = document.createElement('form');
+                                            form.method = 'POST';
+                                            form.action = '/cart/add';
+
+                                            const productIdInput = document.createElement('input');
+                                            productIdInput.type = 'hidden';
+                                            productIdInput.name = 'productId';
+                                            productIdInput.value = currentProduct._id;
+
+                                            const qtyInput = document.createElement('input');
+                                            qtyInput.type = 'hidden';
+                                            qtyInput.name = 'quantity';
+                                            qtyInput.value = '1';
+
+                                            const sizeInput = document.createElement('input');
+                                            sizeInput.type = 'hidden';
+                                            sizeInput.name = 'selectedSize';
+                                            sizeInput.value = selectedSize;
+
+                                            form.appendChild(productIdInput);
+                                            form.appendChild(qtyInput);
+                                            form.appendChild(sizeInput);
+
+                                            document.body.appendChild(form);
+                                            form.submit();
+                                        }
+
+                                        // Ana sayfa yüzük ölçü bulma modalı fonksiyonları
+                                        function openRingSizeModalHome() {
+                                            const modal = document.getElementById('ringSizeModalHome');
+                                            modal.style.display = 'flex';
+                                            document.body.style.overflow = 'hidden';
+
+                                            goToModalStepHome(1);
+
+                                            // Select'i doldur
+                                            const selectEl = document.getElementById('msize-comparator-select-h');
+                                            if (selectEl && selectEl.children.length === 0) {
+                                                ringSizeChartHome.forEach(item => {
+                                                    const option = document.createElement('option');
+                                                    option.value = item.size;
+                                                    option.text = `Ölçü ${item.size} (${item.diameter.toFixed(2)} mm)`;
+                                                    if (item.size === 15) option.selected = true;
+                                                    selectEl.appendChild(option);
+                                                });
+                                            }
+                                        }
+
+                                        function closeRingSizeModalHome() {
+                                            const modal = document.getElementById('ringSizeModalHome');
+                                            modal.style.display = 'none';
+                                            document.body.style.overflow = '';
+                                        }
+
+                                        function goToModalStepHome(step) {
+                                            document.querySelectorAll('#mstep-content-h1, #mstep-content-h2, #mstep-content-h3').forEach(el => el.style.display = 'none');
+                                            document.getElementById(`mstep-content-h${step}`).style.display = 'block';
+
+                                            document.querySelectorAll('#mstep-dot-h1, #mstep-dot-h2, #mstep-dot-h3').forEach((el, index) => {
+                                                const dotNum = index + 1;
+                                                const numEl = el.querySelector('.modal-step-num');
+
+                                                if (dotNum < step) {
+                                                    el.style.color = '#c5a059';
+                                                    if (numEl) {
+                                                        numEl.style.background = '#28a745';
+                                                        numEl.style.color = '#fff';
+                                                        numEl.innerHTML = '<i class="fas fa-check"></i>';
+                                                    }
+                                                } else if (dotNum === step) {
+                                                    el.style.color = '#c5a059';
+                                                    if (numEl) {
+                                                        numEl.style.background = '#c5a059';
+                                                        numEl.style.color = '#fff';
+                                                        numEl.innerHTML = dotNum;
+                                                    }
+                                                } else {
+                                                    el.style.color = '#aaa';
+                                                    if (numEl) {
+                                                        numEl.style.background = '#eee';
+                                                        numEl.style.color = '#888';
+                                                        numEl.innerHTML = dotNum;
+                                                    }
+                                                }
+                                            });
+
+                                            mcurrentStepHome = step;
+
+                                            if (step === 3) {
+                                                calculateModalRingSizeHome(document.getElementById('mring-measure-slider-h').value);
+                                                updateModalComparatorSizeHome(document.getElementById('msize-comparator-select-h').value);
+                                            }
+                                        }
+
+                                        function resizeModalCalibrationCircleHome(px) {
+                                            mcalibrationCirclePixelsHome = parseInt(px);
+                                            const circle = document.getElementById('mcalibration-circle-h');
+                                            circle.style.width = px + 'px';
+                                            circle.style.height = px + 'px';
+                                            document.getElementById('mcal-pixels-label-h').innerText = `Genişlik: ${px}px`;
+                                        }
+
+                                        function tuneModalCalibrationHome(change) {
+                                            const slider = document.getElementById('mcalibration-slider-h');
+                                            let newValue = parseInt(slider.value) + change;
+                                            if (newValue >= 150 && newValue <= 300) {
+                                                slider.value = newValue;
+                                                resizeModalCalibrationCircleHome(newValue);
+                                            }
+                                        }
+
+                                        function saveModalCalibrationAndContinueHome() {
+                                            mpxPerMmHome = mcalibrationCirclePixelsHome / 26.15;
+                                            goToModalStepHome(3);
+                                        }
+
+                                        function switchModalMeasureModeHome(mode) {
+                                            document.getElementById('mmode-content-ring-h').style.display = mode === 'ring' ? 'block' : 'none';
+                                            document.getElementById('mmode-content-circles-h').style.display = mode === 'circles' ? 'block' : 'none';
+                                            document.getElementById('mtab-btn-ring-h').className = 'measure-tab-btn ' + (mode === 'ring' ? 'active' : '');
+                                            document.getElementById('mtab-btn-circles-h').className = 'measure-tab-btn ' + (mode === 'circles' ? 'active' : '');
+                                            if (mode === 'ring') {
+                                                document.getElementById('mtab-btn-ring-h').style.background = '#c5a059';
+                                                document.getElementById('mtab-btn-ring-h').style.color = '#fff';
+                                                document.getElementById('mtab-btn-ring-h').style.borderColor = '#c5a059';
+                                                document.getElementById('mtab-btn-circles-h').style.background = '#fff';
+                                                document.getElementById('mtab-btn-circles-h').style.color = '#555';
+                                                document.getElementById('mtab-btn-circles-h').style.borderColor = '#ccc';
+                                            } else {
+                                                document.getElementById('mtab-btn-circles-h').style.background = '#c5a059';
+                                                document.getElementById('mtab-btn-circles-h').style.color = '#fff';
+                                                document.getElementById('mtab-btn-circles-h').style.borderColor = '#c5a059';
+                                                document.getElementById('mtab-btn-ring-h').style.background = '#fff';
+                                                document.getElementById('mtab-btn-ring-h').style.color = '#555';
+                                                document.getElementById('mtab-btn-ring-h').style.borderColor = '#ccc';
+                                            }
+                                        }
+
+                                        function resizeModalRingMeasureCircleHome(px) {
+                                            const circle = document.getElementById('mring-measure-circle-h');
+                                            circle.style.width = px + 'px';
+                                            circle.style.height = px + 'px';
+                                            calculateModalRingSizeHome(px);
+                                        }
+
+                                        function tuneModalRingMeasureHome(change) {
+                                            const slider = document.getElementById('mring-measure-slider-h');
+                                            let newValue = parseInt(slider.value) + change;
+                                            if (newValue >= 100 && newValue <= 220) {
+                                                slider.value = newValue;
+                                                resizeModalRingMeasureCircleHome(newValue);
+                                            }
+                                        }
+
+                                        function calculateModalRingSizeHome(px) {
+                                            const diameterMm = px / mpxPerMmHome;
+                                            let closestSize = 15;
+                                            let closestDiff = Infinity;
+
+                                            ringSizeChartHome.forEach(item => {
+                                                const diff = Math.abs(item.diameter - diameterMm);
+                                                if (diff < closestDiff) {
+                                                    closestDiff = diff;
+                                                    closestSize = item.size;
+                                                }
+                                            });
+
+                                            document.getElementById('mring-size-result-label-h').innerText = closestSize;
+                                            document.getElementById('mring-diameter-result-label-h').innerText = diameterMm.toFixed(2) + ' mm';
+                                        }
+
+                                        function updateModalComparatorSizeHome(size) {
+                                            const sizeData = ringSizeChartHome.find(s => s.size === parseInt(size));
+                                            if (sizeData) {
+                                                const pxSize = Math.round(sizeData.diameter * mpxPerMmHome);
+                                                const circle = document.getElementById('mring-compare-circle-h');
+                                                circle.style.width = pxSize + 'px';
+                                                circle.style.height = pxSize + 'px';
+                                                document.getElementById('mring-compare-label-h').innerText = size;
+                                                document.getElementById('mring-compare-diameter-label-h').innerText = sizeData.diameter.toFixed(2) + ' mm';
+                                            }
+                                        }
+
+                                        function applyRingSizeToHomeModal() {
+                                            const foundSize = document.getElementById('mring-size-result-label-h').innerText;
+                                            const sizeSelect = document.getElementById('selected-size-home');
+                                            if (sizeSelect) {
+                                                sizeSelect.value = foundSize;
+                                            }
+                                            closeRingSizeModalHome();
+                                        }
+
+                                        // Modal dışına tıklandığında kapat
+                                        window.addEventListener('click', function (event) {
+                                            const addModal = document.getElementById('addToCartModal');
+                                            const sizeModal = document.getElementById('ringSizeModalHome');
+                                            if (event.target === addModal) {
+                                                closeAddToCartModal();
+                                            }
+                                            if (event.target === sizeModal) {
+                                                closeRingSizeModalHome();
+                                            }
+                                        });
                                     </script>
+
         </main>
 
 
