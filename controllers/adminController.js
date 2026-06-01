@@ -410,13 +410,19 @@ exports.deleteUser = async (req, res) => {
 
 // Banner/Slider Yönetimi
 exports.getBanners = async (req, res) => {
+    // Mevcut bannerlara isActive alanını ekle (varsayılan true)
+    await Banner.updateMany(
+        { isActive: { $exists: false } },
+        { $set: { isActive: true } }
+    );
+
     const banners = await Banner.find().sort({ order: 1 });
     res.render('admin/banners', { banners });
 };
 
 exports.addBanner = async (req, res) => {
     try {
-        const { type, imageUrl: textImageUrl, title, subtitle, link, order, desktopHeight, mobileHeight } = req.body;
+        const { type, imageUrl: textImageUrl, title, subtitle, link, order, desktopHeight, mobileHeight, isActive } = req.body;
         let imageUrl = textImageUrl || '';
         let mobileImageUrl = '';
 
@@ -439,7 +445,7 @@ exports.addBanner = async (req, res) => {
             order,
             desktopHeight: desktopHeight || '980px',
             mobileHeight: mobileHeight || '124vw',
-            isActive: true
+            isActive: isActive === 'on'
         });
         await newBanner.save();
         res.redirect('/admin/banners?msg=success');

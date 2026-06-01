@@ -6,6 +6,12 @@ const HomeSection = require('../models/HomeSection');
 
 exports.getHome = async (req, res) => {
     try {
+        // Mevcut bannerlara isActive alanını ekle (varsayılan true)
+        await Banner.updateMany(
+            { isActive: { $exists: false } },
+            { $set: { isActive: true } }
+        );
+        
         const products = await Product.find().sort({ createdAt: -1 }).limit(100);
         const popularProducts = await Product.find({ isPopular: true }).limit(5);
         const heroBanners = await Banner.find({ type: 'hero', isActive: true }).sort({ order: 1 });
