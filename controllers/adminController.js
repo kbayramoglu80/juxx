@@ -134,7 +134,7 @@ exports.postLogin = (req, res) => {
 
 // Ürün Yönetimi
 exports.getProducts = async (req, res) => {
-    const products = await Product.find().populate('categories').sort({ createdAt: -1 });
+    const products = await Product.find().populate('category').sort({ createdAt: -1 });
     const categories = await Category.find().sort({ name: 1 });
     res.render('admin/products', { products, categories });
 };
@@ -183,16 +183,11 @@ exports.uploadTemp = async (req, res) => {
 exports.addProduct = async (req, res) => {
     try {
         const {
-            name, description, price, categories, stock, isPopular,
+            name, description, price, category, stock, isPopular,
             existingImages, existingImagesOrder, videoUrl, videoOrder,
             productCode, metal, metalColor, gemType, caratWeight,
             gemColor, gemClarity, gemCut, certificate
         } = req.body;
-
-        // Handle categories as array
-        const categoryIds = categories
-            ? (Array.isArray(categories) ? categories : [categories])
-            : [];
 
         // Ana görsel: doğrudan dosya yüklemesi (multer → Cloudinary)
         let imageUrl = '/assets/img/gallery/popular1.png';
@@ -259,7 +254,7 @@ exports.addProduct = async (req, res) => {
         }
 
         const newProduct = new Product({
-            name, description, price: parsedPrice, categories: categoryIds, stock,
+            name, description, price: parsedPrice, category, stock,
             imageUrl, images,
             videoUrl: finalVideoUrl,
             videoOrder: parsedVideoOrder,
@@ -287,16 +282,11 @@ exports.addProduct = async (req, res) => {
 exports.editProduct = async (req, res) => {
     try {
         const {
-            name, description, price, categories, stock, isPopular,
+            name, description, price, category, stock, isPopular,
             existingImages, videoUrl, videoOrder, deleteVideo,
             productCode, metal, metalColor, gemType, caratWeight,
             gemColor, gemClarity, gemCut, certificate
         } = req.body;
-        
-        // Handle categories as array
-        const categoryIds = categories
-            ? (Array.isArray(categories) ? categories : [categories])
-            : [];
 
         const parsedPrice = parseTurkishPrice(price);
 
@@ -330,7 +320,7 @@ exports.editProduct = async (req, res) => {
         }
 
         let updateData = {
-            name, description, price: parsedPrice, categories: categoryIds, stock,
+            name, description, price: parsedPrice, category, stock,
             isPopular: isPopular === 'on',
             productCode: productCode || '',
             metal: metal || '',
@@ -425,7 +415,7 @@ exports.getBanners = async (req, res) => {
         { isActive: { $exists: false } },
         { $set: { isActive: true } }
     );
-
+    
     const banners = await Banner.find().sort({ order: 1 });
     res.render('admin/banners', { banners });
 };
