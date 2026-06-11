@@ -11,13 +11,13 @@ exports.getHome = async (req, res) => {
             { isActive: { $exists: false } },
             { $set: { isActive: true } }
         );
-        
+
         const products = await Product.find().sort({ createdAt: -1 }).limit(100);
         const popularProducts = await Product.find({ isPopular: true }).limit(5);
         const heroBanners = await Banner.find({ type: 'hero', isActive: true }).sort({ order: 1 });
         const middleBanners = await Banner.find({ type: 'middle', isActive: true }).sort({ order: 1 });
         const categories = await Category.find().sort({ order: 1, name: 1 });
-        
+
         let setting = await HomeSetting.findOne();
         if (!setting) {
             setting = new HomeSetting();
@@ -25,23 +25,23 @@ exports.getHome = async (req, res) => {
         }
 
         const sections = await HomeSection.find().populate('products').sort({ order: 1 });
-        
-        res.render('index', { 
-            products, 
-            popularProducts, 
-            heroBanners, 
-            middleBanners, 
+
+        res.render('index', {
+            products,
+            popularProducts,
+            heroBanners,
+            middleBanners,
             categories,
             setting,
             sections
         });
     } catch (err) {
         console.error(err);
-        res.render('index', { 
-            products: [], 
-            popularProducts: [], 
-            heroBanners: [], 
-            middleBanners: [], 
+        res.render('index', {
+            products: [],
+            popularProducts: [],
+            heroBanners: [],
+            middleBanners: [],
             categories: [],
             setting: new HomeSetting(),
             sections: []
@@ -54,14 +54,14 @@ exports.getShop = async (req, res) => {
         const { category, karat, renk, berraklik, kesim, metal, sertifika, ara, q } = req.query;
         let query = {};
         let pageTitle = 'Mağaza';
-        
+
         const categories = await Category.find().sort({ name: 1 });
-        
+
         // Kategori filtresi
         if (category) {
             const catObj = await Category.findOne({ slug: category });
             if (catObj) {
-                query.category = catObj._id;
+                query.categories = { $in: [catObj._id] };
                 pageTitle = catObj.name;
             }
         }
@@ -98,10 +98,10 @@ exports.getShop = async (req, res) => {
         // Sertifika filtresi
         if (sertifika) query.certificate = sertifika;
 
-        const products = await Product.find(query).populate('category').sort({ createdAt: -1 });
-        res.render('shop', { 
-            products, categories, 
-            currentCategory: category || 'Hepsi', 
+        const products = await Product.find(query).populate('categories').sort({ createdAt: -1 });
+        res.render('shop', {
+            products, categories,
+            currentCategory: category || 'Hepsi',
             pageTitle,
             activeFilters: { karat, renk, berraklik, kesim, metal, sertifika, ara: araVal }
         });
@@ -118,11 +118,11 @@ exports.getCategory = async (req, res) => {
         if (!catObj) return res.redirect('/shop');
 
         const categories = await Category.find().sort({ name: 1 });
-        const products = await Product.find({ category: catObj._id }).populate('category').sort({ createdAt: -1 });
+        const products = await Product.find({ categories: { $in: [catObj._id] } }).populate('categories').sort({ createdAt: -1 });
 
-        res.render('shop', { 
-            products, 
-            categories, 
+        res.render('shop', {
+            products,
+            categories,
             currentCategory: slug,
             pageTitle: catObj.name,
             activeFilters: {}
@@ -139,7 +139,7 @@ exports.getProductDetails = async (req, res) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.redirect('/shop');
         }
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findById(req.params.id).populate('categories');
         if (!product) return res.redirect('/shop');
         res.render('product_details', { product });
     } catch (err) {
@@ -165,15 +165,15 @@ exports.addToCart = async (req, res) => {
     try {
         const { productId, quantity, selectedCarat, selectedSize } = req.body;
         const product = await Product.findById(productId);
-        
+
         if (!product) {
             return res.status(404).json({ success: false, message: 'Ürün bulunamadı' });
         }
-        
+
         const qty = parseInt(quantity) || 1;
         const caratVal = selectedCarat ? parseFloat(selectedCarat) : null;
         const sizeVal = selectedSize ? selectedSize.toString().trim() : null;
-        
+
         // Karat seçeneğine göre birim fiyat belirleme
         let itemPrice = product.price;
         if (caratVal && product.caratOptions && product.caratOptions.length > 0) {
@@ -182,15 +182,15 @@ exports.addToCart = async (req, res) => {
                 itemPrice = opt.price;
             }
         }
-        
+
         const cart = req.session.cart || [];
         // Hem ürün ID'si hem de seçilen karat ve yüzük ölçüsü eşleşmelidir
-        const existingItemIndex = cart.findIndex(item => 
-            item.productId === productId && 
+        const existingItemIndex = cart.findIndex(item =>
+            item.productId === productId &&
             (caratVal ? item.selectedCarat === caratVal : !item.selectedCarat) &&
             (sizeVal ? item.selectedSize === sizeVal : !item.selectedSize)
         );
-        
+
         if (existingItemIndex >= 0) {
             cart[existingItemIndex].quantity += qty;
         } else {
@@ -204,7 +204,7 @@ exports.addToCart = async (req, res) => {
                 quantity: qty
             });
         }
-        
+
         req.session.cart = cart;
         res.json({ success: true, message: 'Ürün sepete eklendi' });
     } catch (err) {
@@ -218,7 +218,7 @@ exports.removeFromCart = (req, res) => {
         const { productId, selectedCarat, selectedSize } = req.body;
         const caratVal = selectedCarat ? parseFloat(selectedCarat) : null;
         const sizeVal = selectedSize ? selectedSize.toString().trim() : null;
-        
+
         if (req.session.cart) {
             req.session.cart = req.session.cart.filter(item => {
                 const isSameProduct = item.productId === productId;
@@ -241,7 +241,7 @@ exports.getCheckout = (req, res) => {
     if (!req.session.cart || req.session.cart.length === 0) {
         return res.redirect('/cart');
     }
-    
+
     res.render('checkout');
 };
 
