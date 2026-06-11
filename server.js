@@ -34,9 +34,9 @@ app.use((req, res, next) => {
 });
 // Cache static files for better performance
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1d',
-  etag: false,
-  lastModified: false
+    maxAge: '1d',
+    etag: false,
+    lastModified: false
 }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
