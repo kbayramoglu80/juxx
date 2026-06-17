@@ -241,7 +241,7 @@
                     <% if (products && products.length > 0) { %>
                         <% if (currentCategory === 'Hepsi') { %>
                             <% categories.forEach(cat => { %>
-                                <% const catProducts = products.filter(p => p.category && p.category._id.toString() === cat._id.toString()); %>
+                                <% const catProducts = products.filter(p => (p.categories && p.categories.some(c => (c._id ? c._id.toString() : c.toString()) === cat._id.toString())) || (p.category && p.category._id && p.category._id.toString() === cat._id.toString())); %>
                                 <% if (catProducts.length > 0) { %>
                                     <div class="row">
                                         <div class="col-12">
@@ -283,7 +283,7 @@
                             <% }); %>
                             
                             <% /* Kategori atanmamış ürünler (Eğer varsa) */ %>
-                            <% const uncatProducts = products.filter(p => !p.category); %>
+                            <% const uncatProducts = products.filter(p => !(p.categories && p.categories.length > 0) && !p.category); %>
                             <% if (uncatProducts.length > 0) { %>
                                 <div class="row">
                                     <div class="col-12">

@@ -61,7 +61,7 @@ exports.getShop = async (req, res) => {
         if (category) {
             const catObj = await Category.findOne({ slug: category });
             if (catObj) {
-                query.category = catObj._id;
+                query.categories = catObj._id;
                 pageTitle = catObj.name;
             }
         }
@@ -98,7 +98,7 @@ exports.getShop = async (req, res) => {
         // Sertifika filtresi
         if (sertifika) query.certificate = sertifika;
 
-        const products = await Product.find(query).populate('category').sort({ createdAt: -1 });
+        const products = await Product.find(query).populate('categories').sort({ createdAt: -1 });
         res.render('shop', {
             products, categories,
             currentCategory: category || 'Hepsi',
@@ -118,7 +118,7 @@ exports.getCategory = async (req, res) => {
         if (!catObj) return res.redirect('/shop');
 
         const categories = await Category.find().sort({ name: 1 });
-        const products = await Product.find({ category: catObj._id }).populate('category').sort({ createdAt: -1 });
+        const products = await Product.find({ categories: catObj._id }).populate('categories').sort({ createdAt: -1 });
 
         res.render('shop', {
             products,

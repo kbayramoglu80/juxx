@@ -92,7 +92,15 @@
                                 <tr>
                                     <td><img src="<%= product.imageUrl %>" width="50" alt=""></td>
                                     <td><%= product.name %></td>
-                                    <td><%= product.category ? product.category.name : 'Kategorisiz' %></td>
+                                    <td>
+                                        <% if (product.categories && product.categories.length > 0) { %>
+                                            <%= product.categories.map(c => (c.name ? c.name : (c.toString ? c.toString() : ''))).join(', ') %>
+                                        <% } else if (product.category) { %>
+                                            <%= product.category.name %>
+                                        <% } else { %>
+                                            Kategorisiz
+                                        <% } %>
+                                    </td>
                                     <td>₺<%= product.price.toLocaleString('tr-TR') %></td>
                                     <td><%= product.stock %></td>
                                     <td>
@@ -153,12 +161,13 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Kategori</label>
-                                <select name="category" class="form-control" required>
+                                <label>Kategoriler (Birden fazla seçebilirsiniz)</label>
+                                <select name="categories" class="form-control" multiple required style="height:140px;">
                                     <% categories.forEach(cat => { %>
                                         <option value="<%= cat._id %>"><%= cat.name %></option>
                                     <% }); %>
                                 </select>
+                                <small class="text-muted">Ctrl / Cmd ile birden fazla kategori seçebilirsiniz.</small>
                             </div>
                             <div class="form-check mb-3">
                                 <input type="checkbox" name="isPopular" class="form-check-input" id="isPopular">
@@ -387,12 +396,13 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Kategori</label>
-                                <select id="editProductCategory" name="category" class="form-control" required>
+                                <label>Kategoriler (Birden fazla seçebilirsiniz)</label>
+                                <select id="editProductCategory" name="categories" class="form-control" multiple required style="height:140px;">
                                     <% categories.forEach(cat => { %>
                                         <option value="<%= cat._id %>"><%= cat.name %></option>
                                     <% }); %>
                                 </select>
+                                <small class="text-muted">Ctrl / Cmd ile birden fazla kategori seçebilirsiniz.</small>
                             </div>
                             <div class="form-check mb-3">
                                 <input type="checkbox" name="isPopular" class="form-check-input" id="editProductIsPopular">
@@ -740,9 +750,24 @@
         document.getElementById('editProductPrice').value = product.price;
         document.getElementById('editProductStock').value = product.stock;
         
-        if(product.category) {
-            document.getElementById('editProductCategory').value = product.category._id || product.category;
-        }
+        // Set multiple selected categories if available
+        try {
+            const sel = document.getElementById('editProductCategory');
+            for (let i = 0; i < sel.options.length; i++) sel.options[i].selected = false;
+            if (product.categories && product.categories.length > 0) {
+                product.categories.forEach(cat => {
+                    const val = cat._id || cat;
+                    for (let i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === (val.toString ? val.toString() : val)) sel.options[i].selected = true;
+                    }
+                });
+            } else if (product.category) {
+                const val = product.category._id || product.category;
+                for (let i = 0; i < sel.options.length; i++) {
+                    if (sel.options[i].value === (val.toString ? val.toString() : val)) sel.options[i].selected = true;
+                }
+            }
+        } catch(e) {}
 
         document.getElementById('editProductIsPopular').checked = product.isPopular;
         document.getElementById('deleteVideoInput').value = 'false';

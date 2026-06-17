@@ -134,7 +134,7 @@ exports.postLogin = (req, res) => {
 
 // Ürün Yönetimi
 exports.getProducts = async (req, res) => {
-    const products = await Product.find().populate('category').sort({ createdAt: -1 });
+    const products = await Product.find().populate('categories').sort({ createdAt: -1 });
     const categories = await Category.find().sort({ name: 1 });
     res.render('admin/products', { products, categories });
 };
@@ -183,7 +183,7 @@ exports.uploadTemp = async (req, res) => {
 exports.addProduct = async (req, res) => {
     try {
         const {
-            name, description, price, category, stock, isPopular,
+            name, description, price, category, categories: categoriesInput, stock, isPopular,
             existingImages, existingImagesOrder, videoUrl, videoOrder,
             productCode, metal, metalColor, gemType, caratWeight,
             gemColor, gemClarity, gemCut, certificate
@@ -253,8 +253,12 @@ exports.addProduct = async (req, res) => {
             });
         }
 
+        // categories can come as categories (array) or category (single)
+        const rawCategories = categoriesInput || category;
+        const categoriesArr = rawCategories ? (Array.isArray(rawCategories) ? rawCategories : [rawCategories]) : [];
+
         const newProduct = new Product({
-            name, description, price: parsedPrice, category, stock,
+            name, description, price: parsedPrice, categories: categoriesArr, stock,
             imageUrl, images,
             videoUrl: finalVideoUrl,
             videoOrder: parsedVideoOrder,
@@ -282,7 +286,7 @@ exports.addProduct = async (req, res) => {
 exports.editProduct = async (req, res) => {
     try {
         const {
-            name, description, price, category, stock, isPopular,
+            name, description, price, category, categories: categoriesInput, stock, isPopular,
             existingImages, videoUrl, videoOrder, deleteVideo,
             productCode, metal, metalColor, gemType, caratWeight,
             gemColor, gemClarity, gemCut, certificate
@@ -319,8 +323,12 @@ exports.editProduct = async (req, res) => {
             });
         }
 
+        // handle categories input (either categories[] or category)
+        const rawCategoriesEdit = categoriesInput || category;
+        const categoriesArrEdit = rawCategoriesEdit ? (Array.isArray(rawCategoriesEdit) ? rawCategoriesEdit : [rawCategoriesEdit]) : [];
+
         let updateData = {
-            name, description, price: parsedPrice, category, stock,
+            name, description, price: parsedPrice, categories: categoriesArrEdit, stock,
             isPopular: isPopular === 'on',
             productCode: productCode || '',
             metal: metal || '',

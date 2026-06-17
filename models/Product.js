@@ -15,10 +15,12 @@ const productSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
-        required: true
+    categories: {
+        type: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category'
+        }],
+        default: []
     },
     stock: {
         type: Number,
